@@ -1,8 +1,13 @@
 import {
+  AfterViewInit,
   Component,
+  ElementRef,
   EventEmitter,
+  HostListener,
+  OnDestroy,
   OnInit,
-  Output
+  Output,
+  ViewChild
 } from '@angular/core';
 
 import { CommonModule } from '@angular/common';
@@ -31,9 +36,12 @@ import { ResidentRegistrationService } from '../../services/resident-registratio
   templateUrl: './resident-form.component.html',
   styleUrl: './resident-form.component.css'
 })
-export class ResidentFormComponent implements OnInit {
+export class ResidentFormComponent implements OnInit, AfterViewInit, OnDestroy {
 
   @Output() close = new EventEmitter<boolean>();
+
+  @ViewChild('modalContainer') modalContainer?: ElementRef<HTMLElement>;
+  @ViewChild('fullNameInput') fullNameInput?: ElementRef<HTMLInputElement>;
 
   residentForm!: FormGroup;
 
@@ -43,6 +51,8 @@ export class ResidentFormComponent implements OnInit {
   isSubmitting = false;
   errorMessage = '';
 
+  private previouslyFocused: HTMLElement | null = null;
+
   constructor(
     private fb: FormBuilder,
     private buildingsService: BuildingsService,
@@ -51,6 +61,8 @@ export class ResidentFormComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.previouslyFocused = document.activeElement as HTMLElement | null;
+
     this.residentForm = this.fb.group({
       fullName: ['', [Validators.required, Validators.minLength(3)]],
       email: ['', [Validators.required, Validators.email]],
@@ -72,24 +84,86 @@ export class ResidentFormComponent implements OnInit {
     });
   }
 
+  ngAfterViewInit(): void {
+    this.fullNameInput?.nativeElement.focus();
+  }
+
+  ngOnDestroy(): void {
+    this.previouslyFocused?.focus();
+  }
+
+  @HostListener('document:keydown.escape')
+  onEscape(): void {
+    this.onCancel();
+  }
+
+  @HostListener('document:keydown.tab', ['$event'])
+  trapTab($event: Event): void {
+    const event = $event as KeyboardEvent;
+    const container = this.modalContainer?.nativeElement;
+    if (!container) {
+      return;
+    }
+
+    const focusables = Array.from(
+      container.querySelectorAll<HTMLElement>(
+        'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled])'
+      )
+    );
+
+    if (focusables.length === 0) {
+      return;
+    }
+
+    const first = focusables[0];
+    const last = focusables[focusables.length - 1];
+    const active = document.activeElement as HTMLElement | null;
+
+    if (event.shiftKey) {
+      if (!active || !container.contains(active) || active === first) {
+        event.preventDefault();
+        last.focus();
+      }
+      return;
+    }
+
+    if (!active || !container.contains(active) || active === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  }
+
   onBuildingChange(): void {
     const buildingId = Number(this.residentForm.get('buildingId')?.value);
     const unitControl = this.residentForm.get('unitId');
 
+    this.errorMessage = '';
     this.units = [];
     unitControl?.reset(null);
+    unitControl?.disable();
 
     if (!buildingId) {
-      unitControl?.disable();
       return;
     }
 
-    this.unitsService.getByBuildingId(buildingId).subscribe({
+    const requested = buildingId;
+
+    this.unitsService.getByBuildingId(requested).subscribe({
       next: units => {
-        this.units = units.filter(u => (u.status ?? '').toUpperCase() !== 'INACTIVE');
+        if (Number(this.residentForm.get('buildingId')?.value) !== requested) {
+          return;
+        }
+
+        this.units = units.filter(
+          u => (u.status ?? '').toUpperCase() !== 'INACTIVE'
+        );
         unitControl?.enable();
       },
       error: error => {
+        if (Number(this.residentForm.get('buildingId')?.value) !== requested) {
+          return;
+        }
+
         console.error('Error loading units:', error);
         this.errorMessage = 'No se pudieron cargar las unidades de la torre.';
         unitControl?.disable();
@@ -98,15 +172,25 @@ export class ResidentFormComponent implements OnInit {
   }
 
   onSubmit(): void {
+    if (this.isSubmitting) {
+      return;
+    }
+
     if (this.residentForm.invalid) {
+      this.residentForm.markAllAsTouched();
+      return;
+    }
+
+    const value = this.residentForm.getRawValue();
+
+    if (!value.unitId || this.residentForm.get('unitId')?.disabled) {
+      this.errorMessage = 'Selecciona la unidad para vincular al residente.';
       this.residentForm.markAllAsTouched();
       return;
     }
 
     this.isSubmitting = true;
     this.errorMessage = '';
-
-    const value = this.residentForm.getRawValue();
 
     this.residentRegistrationService.registerResident({
       fullName: value.fullName.trim(),
