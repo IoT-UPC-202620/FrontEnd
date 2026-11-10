@@ -668,11 +668,87 @@ server.post('/reservations/:id/cancelations', (req, res) => {
 });
 
 /* =========================================================
+   ASIGNAR TITULAR A UNIDAD (US01 - Escenario 2)
+   ========================================================= */
+
+server.post('/residential/user-units', (req, res) => {
+  const { idUnit, idUser, startDate, endDate, status, relationType } = req.body;
+
+  if (!idUnit || !idUser) {
+    return res.status(400).json({
+      message: 'Faltan campos obligatorios'
+    });
+  }
+
+  const effectiveRelation = String(relationType || 'OWNER').toUpperCase();
+  const effectiveStatus = String(status || 'ACTIVE').toUpperCase();
+
+  const userUnits = db.get('userUnits').value();
+
+  const duplicated = userUnits.find(relation =>
+    Number(relation.idUser) === Number(idUser) &&
+    Number(relation.idUnit) === Number(idUnit)
+  );
+
+  if (duplicated) {
+    return res.status(409).json({
+      message: 'El usuario ya está asignado a esta unidad'
+    });
+  }
+
+  const activeTitular = userUnits.find(relation =>
+    Number(relation.idUnit) === Number(idUnit) &&
+    String(relation.status).toUpperCase() === 'ACTIVE' &&
+    !relation.endDate &&
+    String(relation.relationType || 'OWNER').toUpperCase() === 'OWNER'
+  );
+
+  if (effectiveStatus === 'ACTIVE' && effectiveRelation === 'OWNER' && activeTitular) {
+    return res.status(409).json({
+      message: 'La unidad ya tiene un titular activo'
+    });
+  }
+
+  const newRelation = {
+    id: getNextId('userUnits'),
+    idBuilding: req.body.idBuilding ?? null,
+    idUnit: Number(idUnit),
+    idUser: Number(idUser),
+    startDate: startDate ?? new Date().toISOString().slice(0, 19),
+    endDate: endDate ?? null,
+    status: effectiveStatus,
+    relationType: effectiveRelation
+  };
+
+  newRelation.idUserUnit = newRelation.id;
+
+  db.get('userUnits').push(newRelation).write();
+
+  return res.status(201).json(newRelation);
+});
+
+/* =========================================================
    MOVER RESIDENTE DE UNIDAD
    ========================================================= */
 
 server.put('/residential/user-units/move', (req, res) => {
   const { idUser, newIdUnit, moveDate } = req.body;
+
+  const targetTitular = db
+    .get('userUnits')
+    .find(relation =>
+      Number(relation.idUnit) === Number(newIdUnit) &&
+      String(relation.status).toUpperCase() === 'ACTIVE' &&
+      !relation.endDate &&
+      String(relation.relationType || 'OWNER').toUpperCase() === 'OWNER'
+    )
+    .value();
+
+  if (targetTitular) {
+    return res.status(409).json({
+      message: 'La unidad ya tiene un titular activo'
+    });
+  }
 
   const current = db
     .get('userUnits')
@@ -700,7 +776,8 @@ server.put('/residential/user-units/move', (req, res) => {
     idUser: Number(idUser),
     startDate: moveDate,
     endDate: null,
-    status: 'ACTIVE'
+    status: 'ACTIVE',
+    relationType: 'OWNER'
   };
 
   newRelation.idUserUnit = newRelation.id;
