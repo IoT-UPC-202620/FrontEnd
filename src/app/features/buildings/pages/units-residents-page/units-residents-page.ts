@@ -43,6 +43,9 @@ import { UnitFormComponent } from
 import { BuildingFormComponent } from
     '../../components/building-form.component/building-form.component';
 
+import { ResidentFormComponent } from
+    '../../components/resident-form.component/resident-form.component';
+
 @Component({
   selector: 'app-units-residents-page',
   standalone: true,
@@ -50,7 +53,8 @@ import { BuildingFormComponent } from
     CommonModule,
     UnitFormComponent,
     UserFormComponent,
-    BuildingFormComponent
+    BuildingFormComponent,
+    ResidentFormComponent
   ],
   templateUrl: './units-residents-page.html',
   styleUrl: './units-residents-page.css',
@@ -67,6 +71,8 @@ export class UnitsResidentsPage implements OnInit {
   isEditingUnit = false;
   isCreatingUser = false;
   isCreatingBuilding = false;
+  isRegisteringResident = false;
+  successMessage = '';
 
   totalUnits = 0;
   outstandingDebt = 0;
@@ -287,6 +293,21 @@ export class UnitsResidentsPage implements OnInit {
     this.selectedUnit = null;
 
     if (refresh) {
+      this.loadData();
+    }
+  }
+
+  registerResident(): void {
+    this.isRegisteringResident = true;
+    this.successMessage = '';
+  }
+
+  onResidentFormClose(registered: boolean): void {
+    this.isRegisteringResident = false;
+
+    if (registered) {
+      this.successMessage =
+        'Residente vinculado a la unidad. Sus credenciales llegarán por correo.';
       this.loadData();
     }
   }

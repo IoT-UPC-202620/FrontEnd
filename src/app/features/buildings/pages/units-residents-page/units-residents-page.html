@@ -25,12 +25,24 @@
       <button
         type="button"
         class="btn primary"
+        (click)="registerResident()">
+
+        Register Resident
+      </button>
+
+      <button
+        type="button"
+        class="btn primary"
         (click)="createUnit()">
 
         Add New Unit
       </button>
     </div>
   </header>
+
+  <div class="success-banner" *ngIf="successMessage" role="status">
+    {{ successMessage }}
+  </div>
 
   <section class="summary-grid">
     <article class="summary-card">
@@ -137,3 +149,8 @@
   *ngIf="isCreatingBuilding"
   (close)="onBuildingFormClose($event)">
 </app-building-form>
+
+<app-resident-form
+  *ngIf="isRegisteringResident"
+  (close)="onResidentFormClose($event)">
+</app-resident-form>
