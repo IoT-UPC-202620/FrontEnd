@@ -159,9 +159,11 @@ export class UserFormComponent implements OnInit {
         this.isSubmitting = false;
 
         this.errorMessage =
-          error?.error?.message ??
-          error?.error?.error ??
-          'No se pudo crear el propietario.';
+          typeof error?.error === 'string'
+            ? error.error
+            : error?.error?.message ??
+              error?.error?.error ??
+              'No se pudo crear el propietario.';
       }
     });
   }
