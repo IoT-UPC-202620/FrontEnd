@@ -2,9 +2,10 @@ export const environment = {
   production: true,
 
   /*
-   * URL relativa: el front y la fake API se sirven desde el mismo origen en
-   * Vercel. vercel.json reescribe /api/v1/* hacia la Serverless Function
-   * /api/fake-api, por eso no hay CORS ni URLs absolutas que mantener.
+   * URL relativa: en el despliegue real el front y el ApiGateway deben
+   * servirse detrás del mismo origen (reverse proxy) o cambiar
+   * serverBaseUrl al origen del ApiGateway.
+   * (La fake API json-server ya no se usa para este flujo.)
    */
   serverBaseUrl: '/api/v1',
 
@@ -16,6 +17,7 @@ export const environment = {
   buildingEndpointPath: '/residential/buildings',
   unitEndpointPath: '/residential/units',
   userUnitEndpointPath: '/residential/user-units',
+  residentRegisterEndpointPath: '/residential/residents',
 
   reservationEndpointPath: '/reservations',
   commonAreaEndpointPath: '/common-areas',
