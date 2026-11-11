@@ -22,9 +22,11 @@ export class UserUnitsService extends BaseService<UserUnit> {
     const payload = {
       idUnit: resource.idUnit,
       idUser: resource.idUser,
+      idBuilding: resource.idBuilding,
       startDate: resource.startDate,
       endDate: resource.endDate,
-      status: resource.status
+      status: resource.status,
+      relationType: resource.relationType ?? 'OWNER'
     };
 
     return this.http.post<UserUnit>(

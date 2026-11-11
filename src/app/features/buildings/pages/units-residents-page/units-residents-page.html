@@ -101,6 +101,26 @@
               <small>{{ row.residentRole }}</small>
             </div>
           </div>
+
+          <div
+            class="failed-links"
+            *ngIf="row.failedLinks.length > 0">
+
+            <div
+              class="failed-link"
+              *ngFor="let link of row.failedLinks">
+
+              <span
+                class="badge failed"
+                [title]="link.reason ?? 'status: FAILED'">
+                FAILED
+              </span>
+
+              <small class="failed-reason">
+                {{ link.reason ?? 'El vínculo no pudo completarse.' }}
+              </small>
+            </div>
+          </div>
         </td>
 
         <td>

@@ -11,7 +11,11 @@ export abstract class BaseService<T> {
 
   protected handleError(error: HttpErrorResponse) {
     console.error(`Server-side error: ${error.status} - ${error.message}`);
-    return throwError(() => new Error('Something bad happened; please try again later.'));
+    /*
+     * Propagate the HttpErrorResponse instead of a generic Error so callers
+     * can read the backend body (e.g. `{"message": "..."}` on a 409 conflict).
+     */
+    return throwError(() => error);
   }
 
   protected resourcePath(): string {
