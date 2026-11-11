@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { HttpErrorResponse } from '@angular/common/http';
 
-import { of, Subject } from 'rxjs';
+import { of, Subject, throwError } from 'rxjs';
 
 import { ResidentFormComponent } from './resident-form.component';
 
@@ -58,6 +59,68 @@ describe('ResidentFormComponent', () => {
 
   it('loads buildings on init', () => {
     expect(component.buildings.length).toBe(2);
+  });
+
+  const fillValidForm = () => {
+    component.residentForm.patchValue({ buildingId: 1 });
+    component.onBuildingChange();
+
+    const unit = unitsOf(1)[0];
+    component.residentForm.patchValue({
+      fullName: 'Luis Torres Ramos',
+      email: 'luis@example.com',
+      phone: '987654321',
+      documentNumber: '12345678',
+      unitId: unit.idUnit
+    });
+  };
+
+  it('shows the backend E3 409 message in the alert box', () => {
+    registrationService.registerResident.and.returnValue(
+      throwError(
+        () =>
+          new HttpErrorResponse({
+            status: 409,
+            error: { message: 'El correo ya está registrado' }
+          })
+      )
+    );
+
+    fillValidForm();
+    component.onSubmit();
+    fixture.detectChanges();
+
+    expect(component.errorMessage).toBe('El correo ya está registrado');
+
+    const alert = fixture.nativeElement.querySelector('[role="alert"]');
+    expect(alert?.textContent).toContain('El correo ya está registrado');
+  });
+
+  it('shows the backend 503 message when IAM cannot be verified', () => {
+    registrationService.registerResident.and.returnValue(
+      throwError(
+        () =>
+          new HttpErrorResponse({
+            status: 503,
+            error: {
+              message: 'No se pudo verificar el correo; inténtalo de nuevo'
+            }
+          })
+      )
+    );
+
+    fillValidForm();
+    component.onSubmit();
+    fixture.detectChanges();
+
+    expect(component.errorMessage).toBe(
+      'No se pudo verificar el correo; inténtalo de nuevo'
+    );
+
+    const alert = fixture.nativeElement.querySelector('[role="alert"]');
+    expect(alert?.textContent).toContain(
+      'No se pudo verificar el correo; inténtalo de nuevo'
+    );
   });
 
   it('does not submit while the unit control is disabled', () => {
