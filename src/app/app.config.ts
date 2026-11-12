@@ -4,6 +4,7 @@ import {provideHttpClient, withInterceptors} from '@angular/common/http';
 
 import { routes } from './app.routes';
 import {authTokenInterceptor} from './shared/interceptors/auth-token.interceptor';
+import { provideZard } from '@/shared/core/provider/providezard';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -12,7 +13,7 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes),
     provideHttpClient(
       withInterceptors([authTokenInterceptor])
-    )
-
+    ),
+    provideZard(),
   ]
 };
