@@ -1,0 +1,212 @@
+<div
+  class="modal-backdrop"
+  (click)="onCancel()">
+
+  <div
+    #modalContainer
+    class="modal-container"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="residentFormTitle"
+    (click)="$event.stopPropagation()">
+
+    <header class="modal-header">
+      <div>
+        <h2 id="residentFormTitle">Registrar residente</h2>
+        <p>El residente recibirá sus credenciales por correo electrónico.</p>
+      </div>
+
+      <button
+        type="button"
+        class="close-btn"
+        (click)="onCancel()"
+        [disabled]="isSubmitting"
+        aria-label="Cerrar">
+
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true">
+
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </header>
+
+    <form
+      id="residentForm"
+      [formGroup]="residentForm"
+      (ngSubmit)="onSubmit()"
+      class="form-body"
+      autocomplete="off">
+
+      <div class="form-group">
+        <label for="fullName">Nombre completo</label>
+        <input
+          #fullNameInput
+          type="text"
+          id="fullName"
+          formControlName="fullName"
+          placeholder="Ejemplo: Ana Pérez"
+          [class.is-invalid]="residentForm.get('fullName')?.invalid && residentForm.get('fullName')?.touched"
+          [attr.aria-invalid]="residentForm.get('fullName')?.invalid && residentForm.get('fullName')?.touched ? true : null"
+          [attr.aria-describedby]="residentForm.get('fullName')?.invalid && residentForm.get('fullName')?.touched ? 'fullName-error' : null">
+        <small
+          id="fullName-error"
+          class="error-text"
+          *ngIf="residentForm.get('fullName')?.invalid && residentForm.get('fullName')?.touched">
+
+          El nombre debe tener al menos 3 caracteres.
+        </small>
+      </div>
+
+      <div class="form-group">
+        <label for="email">Correo electrónico</label>
+        <input
+          type="email"
+          id="email"
+          formControlName="email"
+          placeholder="residente@correo.com"
+          autocomplete="email"
+          [class.is-invalid]="residentForm.get('email')?.invalid && residentForm.get('email')?.touched"
+          [attr.aria-invalid]="residentForm.get('email')?.invalid && residentForm.get('email')?.touched ? true : null"
+          [attr.aria-describedby]="residentForm.get('email')?.invalid && residentForm.get('email')?.touched ? 'email-error' : null">
+        <small
+          id="email-error"
+          class="error-text"
+          *ngIf="residentForm.get('email')?.invalid && residentForm.get('email')?.touched">
+
+          Ingresa un correo válido.
+        </small>
+      </div>
+
+      <div class="form-group">
+        <label for="phone">Teléfono móvil</label>
+        <input
+          type="tel"
+          id="phone"
+          formControlName="phone"
+          placeholder="9XXXXXXXX"
+          inputmode="numeric"
+          [class.is-invalid]="residentForm.get('phone')?.invalid && residentForm.get('phone')?.touched"
+          [attr.aria-invalid]="residentForm.get('phone')?.invalid && residentForm.get('phone')?.touched ? true : null"
+          [attr.aria-describedby]="residentForm.get('phone')?.invalid && residentForm.get('phone')?.touched ? 'phone-error' : null">
+        <small
+          id="phone-error"
+          class="error-text"
+          *ngIf="residentForm.get('phone')?.invalid && residentForm.get('phone')?.touched">
+
+          El teléfono debe empezar con 9 y tener 9 dígitos.
+        </small>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="documentType">Tipo de documento</label>
+          <select id="documentType" formControlName="documentType">
+            <option value="DNI">DNI</option>
+            <option value="CE">CE</option>
+            <option value="PASAPORTE">PASAPORTE</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="documentNumber">Número de documento</label>
+          <input
+            type="text"
+            id="documentNumber"
+            formControlName="documentNumber"
+            placeholder="12345678"
+            [class.is-invalid]="residentForm.get('documentNumber')?.invalid && residentForm.get('documentNumber')?.touched"
+            [attr.aria-invalid]="residentForm.get('documentNumber')?.invalid && residentForm.get('documentNumber')?.touched ? true : null"
+            [attr.aria-describedby]="residentForm.get('documentNumber')?.invalid && residentForm.get('documentNumber')?.touched ? 'documentNumber-error' : null">
+          <small
+            id="documentNumber-error"
+            class="error-text"
+            *ngIf="residentForm.get('documentNumber')?.invalid && residentForm.get('documentNumber')?.touched">
+
+            Documento inválido.
+          </small>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="buildingId">Torre</label>
+        <select
+          id="buildingId"
+          formControlName="buildingId"
+          (change)="onBuildingChange()"
+          [class.is-invalid]="residentForm.get('buildingId')?.invalid && residentForm.get('buildingId')?.touched"
+          [attr.aria-invalid]="residentForm.get('buildingId')?.invalid && residentForm.get('buildingId')?.touched ? true : null"
+          [attr.aria-describedby]="residentForm.get('buildingId')?.invalid && residentForm.get('buildingId')?.touched ? 'buildingId-error' : null">
+          <option [ngValue]="null">Selecciona una torre…</option>
+          <option *ngFor="let building of buildings" [ngValue]="building.idBuilding">
+            {{ building.name }} — {{ building.district }}
+          </option>
+        </select>
+        <small
+          id="buildingId-error"
+          class="error-text"
+          *ngIf="residentForm.get('buildingId')?.invalid && residentForm.get('buildingId')?.touched">
+
+          Selecciona la torre.
+        </small>
+      </div>
+
+      <div class="form-group">
+        <label for="unitId">Unidad</label>
+        <select
+          id="unitId"
+          formControlName="unitId"
+          [class.is-invalid]="residentForm.get('unitId')?.invalid && residentForm.get('unitId')?.touched"
+          [attr.aria-invalid]="residentForm.get('unitId')?.invalid && residentForm.get('unitId')?.touched ? true : null"
+          [attr.aria-describedby]="residentForm.get('unitId')?.invalid && residentForm.get('unitId')?.touched ? 'unitId-error' : null">
+          <option [ngValue]="null">Selecciona una unidad…</option>
+          <option *ngFor="let unit of units" [ngValue]="unit.idUnit">
+            Unidad {{ unit.unitNumber }} — Piso {{ unit.floor }} ({{ unit.status }})
+          </option>
+        </select>
+        <small
+          id="unitId-error"
+          class="error-text"
+          *ngIf="residentForm.get('unitId')?.invalid && residentForm.get('unitId')?.touched">
+
+          Selecciona la unidad.
+        </small>
+      </div>
+
+      <div
+        class="general-error"
+        *ngIf="errorMessage"
+        role="alert">
+
+        {{ errorMessage }}
+      </div>
+    </form>
+
+    <footer class="form-footer">
+      <button
+        type="button"
+        class="btn btn-secondary"
+        (click)="onCancel()"
+        [disabled]="isSubmitting">
+
+        Cancelar
+      </button>
+
+      <button
+        type="submit"
+        form="residentForm"
+        class="btn btn-primary"
+        [disabled]="isSubmitting">
+
+        {{ isSubmitting ? 'Registrando…' : 'Confirmar registro' }}
+      </button>
+    </footer>
+  </div>
+</div>

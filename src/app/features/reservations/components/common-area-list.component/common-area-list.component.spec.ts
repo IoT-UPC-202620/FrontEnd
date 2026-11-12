@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { CommonAreaListComponent } from './common-area-list.component';
+import { provideHttpClient } from '@angular/common/http';
 
 describe('CommonAreaListComponent', () => {
   let component: CommonAreaListComponent;
@@ -8,7 +9,8 @@ describe('CommonAreaListComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [CommonAreaListComponent]
+      imports: [CommonAreaListComponent],
+      providers: [provideHttpClient()]
     })
     .compileComponents();
 

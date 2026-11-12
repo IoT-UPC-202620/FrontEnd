@@ -277,7 +277,8 @@ export class UnitFormComponent implements OnInit {
       idUser: ownerId,
       startDate: new Date().toISOString().slice(0, 19),
       endDate: null,
-      status: 'ACTIVE'
+      status: 'ACTIVE',
+      relationType: 'OWNER'
     };
 
     this.userUnitsService.assignUserToUnit(newRelation).subscribe({
@@ -292,6 +293,7 @@ export class UnitFormComponent implements OnInit {
         );
 
         this.errorMessage =
+          error?.error?.message ??
           'La unidad fue creada, pero no se pudo asignar el propietario.';
 
         this.isSaving = false;

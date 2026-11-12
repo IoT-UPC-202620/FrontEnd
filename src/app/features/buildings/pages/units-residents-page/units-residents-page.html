@@ -25,12 +25,24 @@
       <button
         type="button"
         class="btn primary"
+        (click)="registerResident()">
+
+        Register Resident
+      </button>
+
+      <button
+        type="button"
+        class="btn primary"
         (click)="createUnit()">
 
         Add New Unit
       </button>
     </div>
   </header>
+
+  <div class="success-banner" *ngIf="successMessage" role="status">
+    {{ successMessage }}
+  </div>
 
   <section class="summary-grid">
     <article class="summary-card">
@@ -89,6 +101,26 @@
               <small>{{ row.residentRole }}</small>
             </div>
           </div>
+
+          <div
+            class="failed-links"
+            *ngIf="row.failedLinks.length > 0">
+
+            <div
+              class="failed-link"
+              *ngFor="let link of row.failedLinks">
+
+              <span
+                class="badge failed"
+                [title]="link.reason ?? 'status: FAILED'">
+                FAILED
+              </span>
+
+              <small class="failed-reason">
+                {{ link.reason ?? 'El vínculo no pudo completarse.' }}
+              </small>
+            </div>
+          </div>
         </td>
 
         <td>
@@ -137,3 +169,8 @@
   *ngIf="isCreatingBuilding"
   (close)="onBuildingFormClose($event)">
 </app-building-form>
+
+<app-resident-form
+  *ngIf="isRegisteringResident"
+  (close)="onResidentFormClose($event)">
+</app-resident-form>

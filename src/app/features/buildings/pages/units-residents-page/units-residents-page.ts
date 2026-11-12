@@ -43,6 +43,9 @@ import { UnitFormComponent } from
 import { BuildingFormComponent } from
     '../../components/building-form.component/building-form.component';
 
+import { ResidentFormComponent } from
+    '../../components/resident-form.component/resident-form.component';
+
 @Component({
   selector: 'app-units-residents-page',
   standalone: true,
@@ -50,7 +53,8 @@ import { BuildingFormComponent } from
     CommonModule,
     UnitFormComponent,
     UserFormComponent,
-    BuildingFormComponent
+    BuildingFormComponent,
+    ResidentFormComponent
   ],
   templateUrl: './units-residents-page.html',
   styleUrl: './units-residents-page.css',
@@ -67,6 +71,8 @@ export class UnitsResidentsPage implements OnInit {
   isEditingUnit = false;
   isCreatingUser = false;
   isCreatingBuilding = false;
+  isRegisteringResident = false;
+  successMessage = '';
 
   totalUnits = 0;
   outstandingDebt = 0;
@@ -188,12 +194,30 @@ export class UnitsResidentsPage implements OnInit {
       displayedStatus = 'OCCUPIED';
     }
 
-    const activeRelation = residents.find(
+    const relationsForUnit = residents.filter(
       resident =>
-        Number(resident.idUnit) === Number(unit.idUnit) &&
+        Number(resident.idUnit) === Number(unit.idUnit)
+    );
+
+    const activeRelation = relationsForUnit.find(
+      resident =>
         resident.status === 'ACTIVE' &&
         !resident.endDate
     );
+
+    /*
+     * Backstop E2/E3: un vínculo puede quedar FAILED tras el cierre del
+     * modal. Se muestra junto a los ACTIVE con su motivo.
+     */
+    const failedLinks = relationsForUnit
+      .filter(
+        resident =>
+          (resident.status ?? '').toUpperCase() === 'FAILED'
+      )
+      .map(relation => ({
+        residentEmail: relation.residentEmail ?? null,
+        reason: relation.failureReason ?? null
+      }));
 
     const residentUser = activeRelation
       ? users.find(
@@ -201,6 +225,11 @@ export class UnitsResidentsPage implements OnInit {
           Number(user.id) === Number(activeRelation.idUser)
       )
       : undefined;
+
+    const failedFallback =
+      !activeRelation && failedLinks.length > 0
+        ? failedLinks[0].residentEmail ?? 'Registro fallido'
+        : undefined;
 
     return {
       unitId: unit.idUnit,
@@ -213,13 +242,20 @@ export class UnitsResidentsPage implements OnInit {
       unitStatus: displayedStatus,
 
       residentId: residentUser?.id,
-      residentName: residentUser?.fullName ?? 'No Resident',
-      residentRole: residentUser?.roles?.join(', ') ?? 'Not assigned',
+      residentName:
+        residentUser?.fullName ??
+        failedFallback ??
+        'No Resident',
+      residentRole:
+        residentUser?.roles?.join(', ') ??
+        (failedFallback ? 'No vinculado' : 'Not assigned'),
       email: residentUser?.email ?? '—',
       phone: residentUser?.phone ?? '',
 
       debtStatus: 'N/A',
-      debtLabel: 'N/A'
+      debtLabel: 'N/A',
+
+      failedLinks
     };
   }
 
@@ -287,6 +323,21 @@ export class UnitsResidentsPage implements OnInit {
     this.selectedUnit = null;
 
     if (refresh) {
+      this.loadData();
+    }
+  }
+
+  registerResident(): void {
+    this.isRegisteringResident = true;
+    this.successMessage = '';
+  }
+
+  onResidentFormClose(registered: boolean): void {
+    this.isRegisteringResident = false;
+
+    if (registered) {
+      this.successMessage =
+        'Solicitud enviada. El estado del vínculo aparecerá en la tabla; si queda FAILED, verás el motivo.';
       this.loadData();
     }
   }
