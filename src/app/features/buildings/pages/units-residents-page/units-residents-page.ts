@@ -46,6 +46,8 @@ import { BuildingFormComponent } from
 import { ResidentFormComponent } from
     '../../components/resident-form.component/resident-form.component';
 
+import { ZardButtonComponent } from '@/shared/components/button';
+
 @Component({
   selector: 'app-units-residents-page',
   standalone: true,
@@ -54,7 +56,8 @@ import { ResidentFormComponent } from
     UnitFormComponent,
     UserFormComponent,
     BuildingFormComponent,
-    ResidentFormComponent
+    ResidentFormComponent,
+    ZardButtonComponent
   ],
   templateUrl: './units-residents-page.html',
   styleUrl: './units-residents-page.css',
