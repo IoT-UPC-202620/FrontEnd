@@ -57,8 +57,8 @@ export const routes: Routes = [
       {
         path: 'smart-iot',
         loadComponent: () =>
-          import('./features/smart-iot/pages/smart-iot-dashboard/smart-iot-dashboard')
-            .then(m => m.SmartIotDashboard)
+          import('./features/smart-iot/pages/telemetry-dashboard-prototype/telemetry-prototype-page')
+            .then(m => m.TelemetryPrototypePage)
       },
       {
         path: 'smart-iot/access-control',
