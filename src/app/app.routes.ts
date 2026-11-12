@@ -67,6 +67,12 @@ export const routes: Routes = [
             .then(m => m.IotAccessControl)
       },
       {
+        path: 'smart-iot/cards',
+        loadComponent: () =>
+          import('./features/smart-iot/pages/access-cards/access-cards')
+            .then(m => m.TarjetaAccessCards)
+      },
+      {
         path: 'smart-iot/lighting',
         loadComponent: () =>
           import('./features/smart-iot/pages/iot-lighting/iot-lighting')

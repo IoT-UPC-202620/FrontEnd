@@ -1,0 +1,261 @@
+<section class="records-page cards-page">
+  <a class="back-link" routerLink="/app/smart-iot">
+    <span class="material-icons-outlined">arrow_back</span>
+    Volver a SmartIOT
+  </a>
+
+  <div class="page-header">
+    <div>
+      <h1>Tarjetas de acceso</h1>
+      <p>Tarjetas RFID registradas en el edificio: titular, estado y registro en un lector.</p>
+    </div>
+    <div class="total-chip">Total: {{ credentials.length }}</div>
+  </div>
+
+  <div class="register-card">
+    <div class="register-header">
+      <span class="material-icons-outlined register-icon">contactless</span>
+      <h2>Registrar tarjeta nueva</h2>
+    </div>
+
+    @if (enrolling) {
+      <p class="register-help">Poniendo el lector en modo registro…</p>
+    } @else if (isCaptured && enrollment) {
+      <div class="captured-panel">
+        <div class="captured-uid">
+          <span class="material-icons-outlined">credit_card</span>
+          <div>
+            <span class="captured-label">UID capturado</span>
+            <strong>{{ enrollment.capturedUid }}</strong>
+          </div>
+        </div>
+
+        @if (capturedExistingTone === 'retired') {
+          <div class="info-banner">
+            Tarjeta dada de baja: pertenece a {{ existingCredentialHolder }}
+            ({{ existingCredentialStatusLabel }}). Al asociarla queda activa para el usuario que elijas.
+          </div>
+        }
+
+        @if (capturedExistingTone === 'active') {
+          <div class="error-banner">
+            Esta tarjeta ya pertenece a {{ existingCredentialHolder }}.
+            Estado actual: {{ existingCredentialStatusLabel }}. Usa otra tarjeta para registrar una nueva credencial.
+          </div>
+          <div class="captured-actions">
+            <button type="button" class="btn btn-secondary" (click)="closeEnrollment()">Cerrar</button>
+            <button type="button" class="btn btn-primary" (click)="captureAnother()">
+              <span class="material-icons-outlined">refresh</span>
+              Capturar otra
+            </button>
+          </div>
+        } @else {
+          @if (loadingResidents) {
+            <p class="register-help">Cargando usuarios…</p>
+          } @else if (residents.length === 0) {
+            <div class="error-banner">No se encontraron usuarios para asociar la tarjeta.</div>
+          } @else {
+            <label class="select-field">
+              <span>Asignar a</span>
+              <select [value]="selectedUserId ?? ''" (change)="onSelectUser($event)" [disabled]="creatingCredential">
+                @for (user of residents; track trackByUser($index, user)) {
+                  <option [value]="user.id">
+                    {{ user.fullName }}{{ user.email ? ' · ' + user.email : '' }}{{ roleOf(user) ? ' · ' + roleOf(user) : '' }}
+                  </option>
+                }
+              </select>
+            </label>
+          }
+
+          @if (enrollmentError) {
+            <div class="error-banner">{{ enrollmentError }}</div>
+          }
+
+          <div class="captured-actions">
+            <button type="button" class="btn btn-secondary" [disabled]="creatingCredential" (click)="closeEnrollment()">
+              Cancelar
+            </button>
+            <button type="button" class="btn btn-primary" [disabled]="!canAssignCard" (click)="assignCapturedCard()">
+              <span class="material-icons-outlined">person_add</span>
+              {{ creatingCredential ? 'Asociando…' : 'Asociar tarjeta' }}
+            </button>
+          </div>
+        }
+      </div>
+    } @else if (isEnrollmentExpired) {
+      <div class="info-banner">
+        El registro expiró o fue cancelado antes de capturar una tarjeta. Puedes iniciar el modo registro de nuevo.
+      </div>
+      <div class="captured-actions">
+        <button type="button" class="btn btn-secondary" (click)="closeEnrollment()">Cerrar</button>
+        <button type="button" class="btn btn-primary" (click)="onRegisterClick()">
+          <span class="material-icons-outlined">refresh</span>
+          Intentar de nuevo
+        </button>
+      </div>
+    } @else if (enrollment) {
+      <div class="enrollment-wait">
+        <div class="countdown-chip">{{ enrollmentSecondsLeft }} s</div>
+        <div>
+          <p class="enrollment-title">Esperando tarjeta en el lector…</p>
+          <p class="register-help">
+            Acerca la tarjeta RFID al lector. La puerta no se abre durante el registro.
+          </p>
+        </div>
+      </div>
+      @if (enrollmentError) {
+        <div class="error-banner">{{ enrollmentError }}</div>
+      }
+      <button type="button" class="btn btn-secondary btn-block" (click)="cancelEnrollmentMode()">
+        Cancelar modo registro
+      </button>
+    } @else {
+      <p class="register-help">
+        @if (!readersLoaded) {
+          Buscando lectores RFID en línea…
+        } @else if (readers.length === 0) {
+          Ningún lector está en línea. Enciende el lector para registrar tarjetas.
+        } @else {
+          Elige el lector, acerca la tarjeta y asígnala a un usuario. La puerta no se abre durante el registro.
+        }
+      </p>
+      <button type="button" class="btn btn-primary btn-block" [disabled]="readers.length === 0" (click)="onRegisterClick()">
+        <span class="material-icons-outlined">add_card</span>
+        Leer tarjeta en un lector
+      </button>
+
+      @if (readersPickerOpen) {
+        <div class="reader-picker">
+          <p class="reader-picker-title">¿En qué lector acercarás la tarjeta?</p>
+          @for (reader of readers; track trackByReader($index, reader)) {
+            <button type="button" class="reader-option" (click)="pickReader(reader)">
+              <span class="material-icons-outlined">sensor_door</span>
+              <span class="reader-option-text">
+                <strong>{{ reader.name }}</strong>
+                @if (reader.location) {
+                  <small>{{ reader.location }}</small>
+                }
+              </span>
+            </button>
+          }
+        </div>
+      }
+      @if (enrollmentError) {
+        <div class="error-banner">{{ enrollmentError }}</div>
+      }
+    }
+  </div>
+
+  @if (bannerMessage) {
+    <div [class]="bannerTone === 'error' ? 'error-banner' : 'info-banner'">{{ bannerMessage }}</div>
+  }
+
+  @if (errorMessage && credentialsLoaded) {
+    <div class="error-banner error-banner-action">
+      <span>{{ errorMessage }}</span>
+      <button type="button" class="btn btn-secondary btn-small" (click)="loadCredentials()">Reintentar</button>
+    </div>
+  }
+
+  @if (isLoading) {
+    <div class="state-card">Cargando tarjetas…</div>
+  } @else if (errorMessage && !credentialsLoaded) {
+    <div class="state-card state-card-error">
+      <p>{{ errorMessage }}</p>
+      <button type="button" class="btn btn-primary" (click)="loadCredentials()">
+        <span class="material-icons-outlined">refresh</span>
+        Reintentar
+      </button>
+    </div>
+  } @else {
+    <h2 class="section-title">Tarjetas registradas</h2>
+
+    <div class="segmented" role="group" aria-label="Filtrar tarjetas">
+      <button type="button" class="segment" [class.segment-active]="filter === 'all'" (click)="setFilter('all')">
+        Todas ({{ credentials.length }})
+      </button>
+      <button type="button" class="segment" [class.segment-active]="filter === 'active'" (click)="setFilter('active')">
+        Activas ({{ activeCount }})
+      </button>
+      <button type="button" class="segment" [class.segment-active]="filter === 'inactive'" (click)="setFilter('inactive')">
+        Inactivas ({{ inactiveCount }})
+      </button>
+    </div>
+
+    @if (credentials.length === 0) {
+      <div class="state-card">Este edificio aún no tiene tarjetas. Registra la primera desde un lector.</div>
+    } @else if (visibleCredentials.length === 0) {
+      <div class="state-card">No hay tarjetas con este filtro.</div>
+    } @else {
+      <div class="cards-list">
+        @for (credential of visibleCredentials; track trackByCredential($index, credential)) {
+          <div class="card-item" [class.card-item-open]="openActionsId === credential.id">
+            <button type="button" class="card-main" (click)="toggleActions(credential)">
+              <span class="material-icons-outlined card-icon">credit_card</span>
+              <span class="card-body">
+                <strong class="card-holder">{{ holderOf(credential) }}</strong>
+                @if (cardDetails(credential)) {
+                  <small class="card-details">{{ cardDetails(credential) }}</small>
+                }
+                <small class="card-uid">UID {{ credential.rfidUid }}</small>
+                <small class="card-updated">Actualizada: {{ formatDate(credential.updatedAt ?? credential.createdAt) }}</small>
+              </span>
+              @if (busyCredentialId === credential.id) {
+                <span class="card-busy">…</span>
+              } @else {
+                <span [class]="statusChipClass(credential.status)">{{ statusLabel(credential.status) }}</span>
+              }
+            </button>
+
+            @if (openActionsId === credential.id) {
+              <div class="card-actions">
+                <p class="card-actions-hint">
+                  UID {{ credential.rfidUid }}. Una tarjeta revocada o perdida se puede volver a registrar para otro usuario.
+                </p>
+
+                @if (pendingConfirm?.credentialId === credential.id) {
+                  <div class="confirm-box">
+                    <p class="confirm-title">
+                      {{ pendingConfirm?.action === 'LOST' ? '¿Marcar como perdida?' : '¿Revocar la tarjeta?' }}
+                    </p>
+                    <p class="confirm-text">{{ holderOf(credential) }} ya no podrá abrir la puerta con la tarjeta {{ credential.rfidUid }}.</p>
+                    <div class="confirm-actions">
+                      <button type="button" class="btn btn-secondary" (click)="cancelPendingConfirm()">Cancelar</button>
+                      <button type="button" class="btn btn-danger" (click)="confirmPendingAction(credential)">Confirmar</button>
+                    </div>
+                  </div>
+                } @else {
+                  <div class="actions-row">
+                    @if (isActive(credential)) {
+                      <button type="button" class="btn btn-secondary" [disabled]="busyCredentialId != null" (click)="changeStatus(credential, 'SUSPENDED')">
+                        <span class="material-icons-outlined">pause_circle</span>
+                        Suspender
+                      </button>
+                    } @else {
+                      <button type="button" class="btn btn-secondary" [disabled]="busyCredentialId != null" (click)="changeStatus(credential, 'ACTIVE')">
+                        <span class="material-icons-outlined">play_circle</span>
+                        Reactivar
+                      </button>
+                    }
+                    @if (credential.status.toUpperCase() !== 'LOST') {
+                      <button type="button" class="btn btn-secondary" [disabled]="busyCredentialId != null" (click)="requestStatusChange(credential, 'LOST')">
+                        <span class="material-icons-outlined">report</span>
+                        Marcar como perdida
+                      </button>
+                    }
+                    @if (credential.status.toUpperCase() !== 'REVOKED') {
+                      <button type="button" class="btn btn-danger-outline" [disabled]="busyCredentialId != null" (click)="requestStatusChange(credential, 'REVOKED')">
+                        <span class="material-icons-outlined">block</span>
+                        Revocar
+                      </button>
+                    }
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        }
+      </div>
+    }
+  }
+</section>
