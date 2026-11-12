@@ -114,6 +114,16 @@ tr:last-child td {
   color: #6b7280;
 }
 
+.cards-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 10px;
+  color: #8A0B80;
+  font-weight: 800;
+  text-decoration: none;
+}
+
 @media (max-width: 700px) {
   .page-header {
     flex-direction: column;
