@@ -1,11 +1,39 @@
 import {Component, EventEmitter, Input, Output} from '@angular/core';
+import {NgIcon, provideIcons} from '@ng-icons/core';
+import {
+  lucideBuilding,
+  lucideDumbbell,
+  lucideFlame,
+  lucideHistory,
+  lucideLaptop,
+  lucidePartyPopper,
+  lucideSun,
+  lucideUsers,
+  lucideWaves,
+} from '@ng-icons/lucide';
+
+import {ZardBadgeComponent} from '@/shared/components/badge';
+import {ZardButtonComponent} from '@/shared/components/button';
+
 import {CommonArea} from '../../model/common-area.model';
 
 @Component({
   selector: 'app-common-area-card',
-  imports: [],
+  imports: [NgIcon, ZardBadgeComponent, ZardButtonComponent],
+  viewProviders: [
+    provideIcons({
+      lucideBuilding,
+      lucideDumbbell,
+      lucideFlame,
+      lucideHistory,
+      lucideLaptop,
+      lucidePartyPopper,
+      lucideSun,
+      lucideUsers,
+      lucideWaves,
+    }),
+  ],
   templateUrl: './common-area-card.component.html',
-  styleUrl: './common-area-card.component.css',
 })
 export class CommonAreaCardComponent {
   @Input() commonArea!: CommonArea;
@@ -17,19 +45,21 @@ export class CommonAreaCardComponent {
   get areaIcon(): string {
     switch (this.commonArea?.type) {
       case 'POOL':
-        return 'pool';
+        return 'lucideWaves';
       case 'GYM':
-        return 'fitness_center';
+        return 'lucideDumbbell';
       case 'COWORKING_ROOM':
-        return 'groups';
+        return 'lucideLaptop';
       case 'BBQ_AREA':
-        return 'outdoor_grill';
+        return 'lucideFlame';
       case 'PARTY_ROOM':
-        return 'celebration';
+        return 'lucidePartyPopper';
       case 'MEETING_ROOM':
-        return 'meeting_room';
+        return 'lucideUsers';
+      case 'TERRACE':
+        return 'lucideSun';
       default:
-        return 'apartment';
+        return 'lucideBuilding';
     }
   }
 

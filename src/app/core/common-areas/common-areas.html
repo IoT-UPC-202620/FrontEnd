@@ -1,54 +1,79 @@
-<div class="page-container">
-  <div class="calendar-container">
-    <app-calendar></app-calendar>
-  </div>
-
-  <div class="area-container">
-    <div class="area-title">
-      <h1>Manage Areas</h1>
-      <p>Configure rules and availability for common amenities.</p>
+<div class="flex min-h-full flex-col gap-6">
+  <header class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+    <div class="flex flex-col gap-2">
+      <h1 class="text-2xl font-semibold tracking-tight sm:text-3xl">
+        Manage Areas
+      </h1>
+      <p class="text-muted-foreground text-[1.05rem] sm:text-base sm:text-balance">
+        Configure rules and availability for common amenities.
+      </p>
     </div>
 
-    <div class="area-list">
+    <div class="shrink-0">
+      <button
+        type="button"
+        z-button
+        zType="default"
+        zSize="lg"
+        class="w-full gap-2 px-4 sm:w-auto"
+        (click)="openCreateModal()"
+      >
+        <ng-icon name="lucidePlus" class="size-4" />
+        Add New Area
+      </button>
+    </div>
+  </header>
+
+  <div class="flex flex-col gap-6 xl:flex-row">
+    <div class="w-full xl:w-2/3">
+      <app-calendar></app-calendar>
+    </div>
+
+    <div class="flex w-full flex-col gap-4 rounded-lg border bg-card text-card-foreground shadow-xs p-4 sm:p-6 xl:w-1/3">
+      <h2 class="text-lg font-semibold tracking-tight">Areas</h2>
+
       <app-common-area-list   (editRules)="openEditModal($event)"
                               (statusChanged)="updateAreaStatus($event)"
                               (viewHistory)="openHistoryModal($event)">
 
         ></app-common-area-list>
 
-      <button class="add-area-button" (click)="openCreateModal()">
+      <button type="button" z-button zType="outline" class="w-full gap-2" (click)="openCreateModal()">
+        <ng-icon name="lucidePlus" class="size-4" />
         Add New Area
       </button>
-    </div>
 
-    <div class="maintenance-card">
-      <div class="maintenance-icon">
-        <span class="material-icons">handyman</span>
-      </div>
+      <div class="flex items-center gap-4 rounded-xl border bg-muted/50 p-4">
+        <div class="flex size-11 shrink-0 items-center justify-center rounded-lg bg-background text-primary">
+          <ng-icon name="lucideWrench" class="size-5" />
+        </div>
 
-      <div class="maintenance-content">
-        <h3>Maintenance Schedule</h3>
-        <p>{{ maintenanceSummary }}</p>
+        <div class="flex flex-col gap-1">
+          <h3 class="font-semibold">Maintenance Schedule</h3>
+          <p class="text-sm text-muted-foreground">{{ maintenanceSummary }}</p>
+        </div>
       </div>
     </div>
   </div>
 </div>
 
-<div class="modal-backdrop" *ngIf="showCreateModal">
-  <div class="modal-card">
-    <div class="modal-header">
-      <h2>Create Common Area</h2>
-      <button class="close-button" (click)="closeCreateModal()">×</button>
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50" *ngIf="showCreateModal">
+  <div class="w-full max-w-md max-h-[90vh] overflow-y-auto rounded-lg border bg-card text-card-foreground shadow-lg p-6">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-lg font-semibold">Create Common Area</h2>
+      <button type="button" class="rounded-md p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground" (click)="closeCreateModal()" aria-label="Close">
+        <ng-icon name="lucideX" class="size-5" />
+      </button>
     </div>
 
     <form [formGroup]="areaForm" (ngSubmit)="createArea()">
-      <label>Area Name</label>
-      <input formControlName="name" type="text" placeholder="Example: BBQ Area" />
+      <label class="block text-sm font-medium text-muted-foreground mb-1.5">Area Name</label>
+      <input class="h-10 w-full rounded-md border border-input bg-background px-3 text-sm mb-4 outline-none focus-visible:ring-2 focus-visible:ring-ring" formControlName="name" type="text" placeholder="Example: BBQ Area" />
 
-      <div class="form-row">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
         <div>
-          <label>Type</label>
-          <select formControlName="type">
+          <label class="block text-sm font-medium text-muted-foreground mb-1.5">Type</label>
+          <select class="h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring" formControlName="type">
             <option value="POOL">Pool</option>
             <option value="GYM">Gym</option>
             <option value="COWORKING_ROOM">Coworking Room</option>
@@ -60,99 +85,101 @@
         </div>
 
         <div>
-          <label>Capacity</label>
-          <input formControlName="maxCapacity" type="number" min="1" />
+          <label class="block text-sm font-medium text-muted-foreground mb-1.5">Capacity</label>
+          <input class="h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring" formControlName="maxCapacity" type="number" min="1" />
         </div>
       </div>
 
-      <div class="form-row">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
         <div>
-          <label>Booking Type</label>
-          <select formControlName="bookingType">
+          <label class="block text-sm font-medium text-muted-foreground mb-1.5">Booking Type</label>
+          <select class="h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring" formControlName="bookingType">
             <option value="SHARED">Shared</option>
             <option value="EXCLUSIVE">Exclusive</option>
           </select>
         </div>
 
         <div>
-          <label>Status</label>
-          <select formControlName="status">
+          <label class="block text-sm font-medium text-muted-foreground mb-1.5">Status</label>
+          <select class="h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring" formControlName="status">
             <option value="AVAILABLE">Available</option>
             <option value="MAINTENANCE">Maintenance</option>
           </select>
         </div>
       </div>
 
-      <h3>Rules</h3>
+      <h3 class="text-sm font-semibold text-primary mt-2 mb-3">Rules</h3>
 
-      <div class="form-row">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
         <div>
-          <label>Max Hours</label>
-          <input formControlName="maxReservationHours" type="number" min="1" />
+          <label class="block text-sm font-medium text-muted-foreground mb-1.5">Max Hours</label>
+          <input class="h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring" formControlName="maxReservationHours" type="number" min="1" />
         </div>
 
         <div>
-          <label>Price</label>
-          <input formControlName="price" type="number" min="0" />
-        </div>
-      </div>
-
-      <div class="form-row">
-        <div>
-          <label>Guarantee Amount</label>
-          <input formControlName="guaranteeAmount" type="number" min="0" />
-        </div>
-
-        <div>
-          <label>Penalty Amount</label>
-          <input formControlName="penaltyAmount" type="number" min="0" />
+          <label class="block text-sm font-medium text-muted-foreground mb-1.5">Price</label>
+          <input class="h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring" formControlName="price" type="number" min="0" />
         </div>
       </div>
 
-      <label>Penalty Hours Before</label>
-      <input formControlName="penaltyHoursBefore" type="number" min="0" />
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+        <div>
+          <label class="block text-sm font-medium text-muted-foreground mb-1.5">Guarantee Amount</label>
+          <input class="h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring" formControlName="guaranteeAmount" type="number" min="0" />
+        </div>
 
-      <div class="switch-list">
+        <div>
+          <label class="block text-sm font-medium text-muted-foreground mb-1.5">Penalty Amount</label>
+          <input class="h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring" formControlName="penaltyAmount" type="number" min="0" />
+        </div>
+      </div>
+
+      <label class="block text-sm font-medium text-muted-foreground mb-1.5">Penalty Hours Before</label>
+      <input class="h-10 w-full rounded-md border border-input bg-background px-3 text-sm mb-4 outline-none focus-visible:ring-2 focus-visible:ring-ring" formControlName="penaltyHoursBefore" type="number" min="0" />
+
+      <div class="grid gap-2 mt-2">
 
 
-        <label>
+        <label class="rounded-md bg-muted/50 px-3 py-2 flex justify-between items-center text-sm font-medium text-foreground">
           Allow Cancellation
-          <input type="checkbox" formControlName="allowCancellation" />
+          <input class="size-[18px] accent-primary" type="checkbox" formControlName="allowCancellation" />
         </label>
 
-        <label>
+        <label class="rounded-md bg-muted/50 px-3 py-2 flex justify-between items-center text-sm font-medium text-foreground">
           Requires Approval
-          <input type="checkbox" formControlName="requiresApproval" />
+          <input class="size-[18px] accent-primary" type="checkbox" formControlName="requiresApproval" />
         </label>
       </div>
 
-      <div class="modal-actions">
-        <button type="button" class="cancel-button" (click)="closeCreateModal()">
+      <div class="grid grid-cols-2 gap-3 mt-5">
+        <button type="button" z-button zType="outline" class="w-full" (click)="closeCreateModal()">
           Cancel
         </button>
 
-        <button type="submit" class="save-button" [disabled]="areaForm.invalid">
+        <button type="submit" z-button zType="default" class="w-full" [disabled]="areaForm.invalid">
           Create Area
         </button>
       </div>
     </form>
   </div>
 </div>
-<div class="modal-backdrop" *ngIf="showEditModal">
-  <div class="modal-card">
-    <div class="modal-header">
-      <h2>Edit Common Area Rules</h2>
-      <button class="close-button" (click)="closeEditModal()">×</button>
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50" *ngIf="showEditModal">
+  <div class="w-full max-w-md max-h-[90vh] overflow-y-auto rounded-lg border bg-card text-card-foreground shadow-lg p-6">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-lg font-semibold">Edit Common Area Rules</h2>
+      <button type="button" class="rounded-md p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground" (click)="closeEditModal()" aria-label="Close">
+        <ng-icon name="lucideX" class="size-5" />
+      </button>
     </div>
 
     <form [formGroup]="editForm" (ngSubmit)="updateRules()">
-      <label>Area Name</label>
-      <input formControlName="name" type="text" />
+      <label class="block text-sm font-medium text-muted-foreground mb-1.5">Area Name</label>
+      <input class="h-10 w-full rounded-md border border-input bg-background px-3 text-sm mb-4 outline-none focus-visible:ring-2 focus-visible:ring-ring" formControlName="name" type="text" />
 
-      <div class="form-row">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
         <div>
-          <label>Type</label>
-          <select formControlName="type">
+          <label class="block text-sm font-medium text-muted-foreground mb-1.5">Type</label>
+          <select class="h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring" formControlName="type">
             <option value="POOL">Pool</option>
             <option value="GYM">Gym</option>
             <option value="COWORKING_ROOM">Coworking Room</option>
@@ -164,76 +191,76 @@
         </div>
 
         <div>
-          <label>Capacity</label>
-          <input formControlName="maxCapacity" type="number" />
+          <label class="block text-sm font-medium text-muted-foreground mb-1.5">Capacity</label>
+          <input class="h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring" formControlName="maxCapacity" type="number" />
         </div>
       </div>
 
-      <div class="form-row">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
         <div>
-          <label>Booking Type</label>
-          <select formControlName="bookingType">
+          <label class="block text-sm font-medium text-muted-foreground mb-1.5">Booking Type</label>
+          <select class="h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring" formControlName="bookingType">
             <option value="SHARED">Shared</option>
             <option value="EXCLUSIVE">Exclusive</option>
           </select>
         </div>
 
         <div>
-          <label>Status</label>
-          <select formControlName="status">
+          <label class="block text-sm font-medium text-muted-foreground mb-1.5">Status</label>
+          <select class="h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring" formControlName="status">
             <option value="AVAILABLE">Available</option>
             <option value="MAINTENANCE">Maintenance</option>
           </select>
         </div>
       </div>
 
-      <h3>Rules</h3>
+      <h3 class="text-sm font-semibold text-primary mt-2 mb-3">Rules</h3>
 
-      <div class="form-row">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
         <div>
-          <label>Max Hours</label>
-          <input formControlName="maxReservationHours" type="number" />
+          <label class="block text-sm font-medium text-muted-foreground mb-1.5">Max Hours</label>
+          <input class="h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring" formControlName="maxReservationHours" type="number" />
         </div>
 
         <div>
-          <label>Price</label>
-          <input formControlName="price" type="number" />
-        </div>
-      </div>
-
-      <div class="form-row">
-        <div>
-          <label>Guarantee Amount</label>
-          <input formControlName="guaranteeAmount" type="number" />
-        </div>
-
-        <div>
-          <label>Penalty Amount</label>
-          <input formControlName="penaltyAmount" type="number" />
+          <label class="block text-sm font-medium text-muted-foreground mb-1.5">Price</label>
+          <input class="h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring" formControlName="price" type="number" />
         </div>
       </div>
 
-      <label>Penalty Hours Before</label>
-      <input formControlName="penaltyHoursBefore" type="number" />
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+        <div>
+          <label class="block text-sm font-medium text-muted-foreground mb-1.5">Guarantee Amount</label>
+          <input class="h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring" formControlName="guaranteeAmount" type="number" />
+        </div>
 
-      <div class="switch-list">
-        <label>
+        <div>
+          <label class="block text-sm font-medium text-muted-foreground mb-1.5">Penalty Amount</label>
+          <input class="h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring" formControlName="penaltyAmount" type="number" />
+        </div>
+      </div>
+
+      <label class="block text-sm font-medium text-muted-foreground mb-1.5">Penalty Hours Before</label>
+      <input class="h-10 w-full rounded-md border border-input bg-background px-3 text-sm mb-4 outline-none focus-visible:ring-2 focus-visible:ring-ring" formControlName="penaltyHoursBefore" type="number" />
+
+      <div class="grid gap-2 mt-2">
+        <label class="rounded-md bg-muted/50 px-3 py-2 flex justify-between items-center text-sm font-medium text-foreground">
           Allow Cancellation
-          <input type="checkbox" formControlName="allowCancellation" />
+          <input class="size-[18px] accent-primary" type="checkbox" formControlName="allowCancellation" />
         </label>
 
-        <label>
+        <label class="rounded-md bg-muted/50 px-3 py-2 flex justify-between items-center text-sm font-medium text-foreground">
           Requires Approval
-          <input type="checkbox" formControlName="requiresApproval" />
+          <input class="size-[18px] accent-primary" type="checkbox" formControlName="requiresApproval" />
         </label>
       </div>
 
-      <div class="modal-actions">
-        <button type="button" class="cancel-button" (click)="closeEditModal()">
+      <div class="grid grid-cols-2 gap-3 mt-5">
+        <button type="button" z-button zType="outline" class="w-full" (click)="closeEditModal()">
           Cancel
         </button>
 
-        <button type="submit" class="save-button">
+        <button type="submit" z-button zType="default" class="w-full">
           Save Changes
         </button>
       </div>
@@ -241,56 +268,58 @@
   </div>
 </div>
 
-<div class="modal-backdrop" *ngIf="showHistoryModal && selectedArea">
-  <div class="modal-card">
-    <div class="modal-header">
-      <h2>{{ selectedArea.name }}</h2>
-      <button class="close-button" (click)="closeHistoryModal()">×</button>
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50" *ngIf="showHistoryModal && selectedArea">
+  <div class="w-full max-w-md max-h-[90vh] overflow-y-auto rounded-lg border bg-card text-card-foreground shadow-lg p-6">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-lg font-semibold">{{ selectedArea.name }}</h2>
+      <button type="button" class="rounded-md p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground" (click)="closeHistoryModal()" aria-label="Close">
+        <ng-icon name="lucideX" class="size-5" />
+      </button>
     </div>
 
-    <div class="rule-summary">
-      <div class="rule-row">
+    <div class="flex flex-col gap-2.5">
+      <div class="flex items-center justify-between gap-4 rounded-md bg-muted/50 px-3.5 py-3 text-sm text-muted-foreground">
         <span>Max reservation hours</span>
-        <strong>{{ selectedArea.rules?.maxReservationHours ?? 1 }}</strong>
+        <strong class="text-foreground font-semibold text-right">{{ selectedArea.rules?.maxReservationHours ?? 1 }}</strong>
       </div>
 
-      <div class="rule-row">
+      <div class="flex items-center justify-between gap-4 rounded-md bg-muted/50 px-3.5 py-3 text-sm text-muted-foreground">
         <span>Price</span>
-        <strong>$ {{ selectedArea.rules?.price ?? 0 }}</strong>
+        <strong class="text-foreground font-semibold text-right">$ {{ selectedArea.rules?.price ?? 0 }}</strong>
       </div>
 
-      <div class="rule-row">
+      <div class="flex items-center justify-between gap-4 rounded-md bg-muted/50 px-3.5 py-3 text-sm text-muted-foreground">
         <span>Guarantee amount</span>
-        <strong>$ {{ selectedArea.rules?.guaranteeAmount ?? 0 }}</strong>
+        <strong class="text-foreground font-semibold text-right">$ {{ selectedArea.rules?.guaranteeAmount ?? 0 }}</strong>
       </div>
 
-      <div class="rule-row">
+      <div class="flex items-center justify-between gap-4 rounded-md bg-muted/50 px-3.5 py-3 text-sm text-muted-foreground">
         <span>Penalty</span>
-        <strong>
+        <strong class="text-foreground font-semibold text-right">
           $ {{ selectedArea.rules?.penaltyAmount ?? 0 }}
           ({{ selectedArea.rules?.penaltyHoursBefore ?? 0 }} h antes)
         </strong>
       </div>
 
-      <div class="rule-row">
+      <div class="flex items-center justify-between gap-4 rounded-md bg-muted/50 px-3.5 py-3 text-sm text-muted-foreground">
         <span>Allow cancellation</span>
-        <strong>{{ selectedArea.rules?.allowCancellation ? 'Sí' : 'No' }}</strong>
+        <strong class="text-foreground font-semibold text-right">{{ selectedArea.rules?.allowCancellation ? 'Sí' : 'No' }}</strong>
       </div>
 
-      <div class="rule-row">
+      <div class="flex items-center justify-between gap-4 rounded-md bg-muted/50 px-3.5 py-3 text-sm text-muted-foreground">
         <span>Requires approval</span>
-        <strong>{{ selectedArea.rules?.requiresApproval ? 'Sí' : 'No' }}</strong>
+        <strong class="text-foreground font-semibold text-right">{{ selectedArea.rules?.requiresApproval ? 'Sí' : 'No' }}</strong>
       </div>
 
-      <div class="rule-row">
+      <div class="flex items-center justify-between gap-4 rounded-md bg-muted/50 px-3.5 py-3 text-sm text-muted-foreground">
         <span>Max capacity</span>
-        <strong>{{ selectedArea.maxCapacity }} personas</strong>
+        <strong class="text-foreground font-semibold text-right">{{ selectedArea.maxCapacity }} personas</strong>
       </div>
     </div>
 
-    <div class="modal-actions">
-      <div class="modal-actions-single">
-        <button type="button" class="save-button" (click)="closeHistoryModal()">
+    <div class="grid grid-cols-2 gap-3 mt-5">
+      <div class="col-span-2">
+        <button type="button" z-button zType="default" class="w-full" (click)="closeHistoryModal()">
           Close
         </button>
       </div>

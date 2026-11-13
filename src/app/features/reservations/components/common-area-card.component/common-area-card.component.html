@@ -1,35 +1,57 @@
-<div class="common-area-card">
-  <div class="card-header">
-    <div class="icon-box">
-      <span class="material-icons">{{ areaIcon }}</span>
+<div
+  class="rounded-lg border bg-card text-card-foreground shadow-xs flex flex-col gap-4 p-4"
+>
+  <div class="flex items-center gap-3">
+    <div
+      class="bg-muted text-muted-foreground flex size-10 shrink-0 items-center justify-center rounded-md"
+    >
+      <ng-icon [name]="areaIcon" class="size-5" />
     </div>
 
-    <div class="card-content">
-      <h3>{{ commonArea.name }}</h3>
-
-      <p class="badge">{{ areaBadge }}</p>
+    <div class="min-w-0 flex-1">
+      <h3 class="truncate font-medium leading-tight">{{ commonArea.name }}</h3>
+      <z-badge zType="outline" class="mt-1.5">{{ areaBadge }}</z-badge>
     </div>
 
-    <div class="card-btn-container">
-      <label class="switch">
-        <input
-          type="checkbox"
-          [checked]="commonArea.status === 'AVAILABLE'"
-          (change)="toggleStatus()">
-        <span class="slider"></span>
-      </label>
-    </div>
+    <label
+      class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center"
+      [title]="commonArea.status === 'AVAILABLE' ? 'Set to maintenance' : 'Set to available'"
+    >
+      <input
+        type="checkbox"
+        class="peer sr-only"
+        [checked]="commonArea.status === 'AVAILABLE'"
+        (change)="toggleStatus()"
+        [attr.aria-label]="'Toggle availability of ' + commonArea.name">
+      <span
+        class="absolute inset-0 rounded-full bg-muted transition-colors peer-checked:bg-primary peer-focus-visible:ring-2 peer-focus-visible:ring-ring peer-focus-visible:ring-offset-2"
+      ></span>
+      <span
+        class="absolute left-1 size-4 rounded-full bg-white shadow-sm transition-transform peer-checked:translate-x-5"
+      ></span>
+    </label>
   </div>
 
-  <div class="card-actions">
-    <button class="btn-primary" (click)="openEditRules(commonArea)">Edit Rules</button>
+  <div class="flex flex-wrap items-center gap-2">
+    <button
+      z-button
+      zType="outline"
+      zSize="sm"
+      type="button"
+      class="flex-1 sm:flex-none"
+      (click)="openEditRules(commonArea)">
+      Edit Rules
+    </button>
 
     <button
-      class="btn-icon"
+      z-button
+      zType="outline"
+      zSize="icon-sm"
       type="button"
       title="Ver reglas actuales"
+      aria-label="Ver reglas actuales"
       (click)="openHistory()">
-      <span class="material-icons">history</span>
+      <ng-icon name="lucideHistory" />
     </button>
   </div>
 </div>

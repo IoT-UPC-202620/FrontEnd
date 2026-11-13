@@ -59,6 +59,16 @@ import {
 } from 'angularx-flatpickr';
 
 import { DatePipe, CommonModule } from '@angular/common';
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import {
+  lucideChevronLeft,
+  lucideChevronRight,
+  lucidePlus,
+  lucideX,
+} from '@ng-icons/lucide';
+
+import { ZardButtonComponent } from '@/shared/components/button';
+
 import { adapterFactory } from 'angular-calendar/date-adapters/date-fns';
 
 interface LegendEntry {
@@ -82,6 +92,8 @@ interface ReservationFormState {
   templateUrl: './calendar.html',
   imports: [
     CommonModule,
+    NgIcon,
+    ZardButtonComponent,
     CalendarPreviousViewDirective,
     CalendarTodayDirective,
     CalendarNextViewDirective,
@@ -95,6 +107,14 @@ interface ReservationFormState {
   providers: [
     provideFlatpickrDefaults(),
     provideCalendar({ provide: DateAdapter, useFactory: adapterFactory }),
+  ],
+  viewProviders: [
+    provideIcons({
+      lucideChevronLeft,
+      lucideChevronRight,
+      lucidePlus,
+      lucideX,
+    }),
   ],
 })
 export class Calendar implements OnInit {

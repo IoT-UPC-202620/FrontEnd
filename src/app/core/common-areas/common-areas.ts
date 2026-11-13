@@ -2,6 +2,10 @@ import { Component, OnInit, ViewChild } from '@angular/core';import { Calendar }
 import { CommonAreaListComponent } from '../../features/reservations/components/common-area-list.component/common-area-list.component';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import { lucidePlus, lucideWrench, lucideX } from '@ng-icons/lucide';
+
+import { ZardButtonComponent } from '@/shared/components/button';
 
 import { CommonArea } from '../../features/reservations/model/common-area.model';
 import { CommonAreaRule } from '../../features/reservations/model/common-area-rule.model';
@@ -14,7 +18,16 @@ import { CommonAreaService } from '../../features/reservations/services/common-a
     CommonModule,
     ReactiveFormsModule,
     Calendar,
-    CommonAreaListComponent
+    CommonAreaListComponent,
+    NgIcon,
+    ZardButtonComponent
+  ],
+  viewProviders: [
+    provideIcons({
+      lucidePlus,
+      lucideWrench,
+      lucideX,
+    }),
   ],
   templateUrl: './common-areas.html',
   styleUrl: './common-areas.css'

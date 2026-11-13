@@ -1,48 +1,78 @@
-<div class="detail-card" *ngIf="reservationDetail">
-  <div class="modal-header">
-    <h2>Detalles de Reservación</h2>
-    <button class="close-button" (click)="close.emit()">×</button>
+<div
+  class="max-h-[90vh] w-full max-w-md overflow-hidden rounded-lg border bg-card text-card-foreground shadow-lg"
+  *ngIf="reservationDetail"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="reservationDetailTitle">
+  <div class="flex items-center justify-between gap-4 border-b px-6 py-4">
+    <h2 id="reservationDetailTitle" class="text-lg font-semibold tracking-tight">
+      Detalles de Reservación
+    </h2>
+    <button
+      type="button"
+      z-button
+      zType="ghost"
+      zSize="icon"
+      class="size-8"
+      aria-label="Close"
+      (click)="close.emit()">
+      <ng-icon name="lucideX" class="size-4" />
+    </button>
   </div>
 
-  <div class="detail-body">
-    <span class="status-pill">
+  <div class="flex flex-col gap-5 px-6 py-5">
+    <z-badge [zType]="reservationDetail.reservation.status === 'CANCELLED' ? 'destructive' : 'default'">
       {{ reservationDetail.reservation.status }}
-    </span>
+    </z-badge>
 
-    <div class="detail-grid">
-      <div>
-        <small>RESIDENTE</small>
-        <strong>{{ reservationDetail.user?.fullName }}</strong>
+    <dl class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <div class="flex flex-col gap-1">
+        <dt class="text-[0.6875rem] font-semibold uppercase tracking-wider text-muted-foreground">
+          Residente
+        </dt>
+        <dd class="text-sm font-medium text-foreground">{{ reservationDetail.user?.fullName }}</dd>
       </div>
 
-      <div>
-        <small>ÁREA COMÚN</small>
-        <strong>{{ reservationDetail.area?.name }}</strong>
+      <div class="flex flex-col gap-1">
+        <dt class="text-[0.6875rem] font-semibold uppercase tracking-wider text-muted-foreground">
+          Área Común
+        </dt>
+        <dd class="text-sm font-medium text-foreground">{{ reservationDetail.area?.name }}</dd>
       </div>
 
-      <div>
-        <small>HORARIO</small>
-        <strong>
+      <div class="flex flex-col gap-1">
+        <dt class="text-[0.6875rem] font-semibold uppercase tracking-wider text-muted-foreground">
+          Horario
+        </dt>
+        <dd class="text-sm font-medium text-foreground">
           {{ formatHour(reservationDetail.reservation.timeSlot) }}
           -
           {{ formatHour(reservationDetail.reservation.timeSlot + 1) }}
-        </strong>
+        </dd>
       </div>
 
-      <div>
-        <small>AFORO / PERSONAS</small>
-        <strong>{{ reservationDetail.reservation.numberOfGuests }} personas</strong>
+      <div class="flex flex-col gap-1">
+        <dt class="text-[0.6875rem] font-semibold uppercase tracking-wider text-muted-foreground">
+          Aforo / Personas
+        </dt>
+        <dd class="text-sm font-medium text-foreground">
+          {{ reservationDetail.reservation.numberOfGuests }} personas
+        </dd>
       </div>
-    </div>
+    </dl>
   </div>
 
-  <div class="detail-actions">
+  <div class="flex flex-wrap items-center justify-end gap-2 border-t px-6 py-4">
     <button
-      class="cancel-reservation-button"
+      type="button"
+      z-button
+      zType="destructive"
+      class="gap-2"
       (click)="cancelReservation.emit(reservationDetail)">
+      <ng-icon name="lucideCalendarX" class="size-4" />
       Cancelar Reservación
     </button>
-    <button class="save-button" (click)="close.emit()">
+    <button type="button" z-button zType="default" (click)="close.emit()">
       Cerrar
     </button>
   </div>
