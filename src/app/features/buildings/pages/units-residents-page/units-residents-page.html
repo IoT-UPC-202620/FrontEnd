@@ -1,42 +1,57 @@
-<div class="units-page">
-  <header class="page-header">
-    <div>
-      <h1>Units & Residents</h1>
-      <p>Manage property inventory and resident information across all towers.</p>
+<div class="flex flex-col gap-6">
+  <header class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+    <div class="flex flex-col gap-2">
+      <h1 class="text-2xl font-semibold tracking-tight first-letter:uppercase sm:text-3xl">
+        Units & Residents
+      </h1>
+      <p class="text-muted-foreground text-[1.05rem] sm:text-base sm:text-balance">
+        Manage property inventory and resident information across all towers.
+      </p>
     </div>
 
-    <div class="header-actions">
+    <div class="relative shrink-0">
       <button
         type="button"
-        class="btn secondary"
-        (click)="createUser()">
-
-        Add New User
+        z-button
+        z-dropdown
+        [zDropdownMenu]="createMenu"
+        zSize="lg"
+        class="w-full gap-2 px-4 sm:w-auto"
+      >
+        <ng-icon name="lucidePlus" class="size-4" />
+        Add new
       </button>
 
-      <button
-        type="button"
-        class="btn secondary"
-        (click)="createBuilding()">
+      <z-dropdown-menu-content #createMenu="zDropdownMenuContent" zAlign="end" class="w-56">
+        <z-dropdown-menu-item (click)="createUser()">
+          <ng-icon name="lucideUserPlus" />
+          User
+        </z-dropdown-menu-item>
 
-        Add New Building
-      </button>
+        <z-dropdown-menu-item (click)="createBuilding()">
+          <ng-icon name="lucideBuilding2" />
+          Building
+        </z-dropdown-menu-item>
+
+        <z-dropdown-menu-item
+          (click)="createUnit()"
+          [disabled]="isLoadingData || buildingsCount === 0"
+          [attr.title]="buildingsCount === 0 ? 'Create a building first' : null"
+        >
+          <ng-icon name="lucideDoorOpen" />
+          Unit
+        </z-dropdown-menu-item>
+      </z-dropdown-menu-content>
 
       <button
         type="button"
         z-button
         zType="default"
+        class="mt-2 w-full gap-2 px-4 sm:w-auto"
         (click)="registerResident()">
 
+        <ng-icon name="lucideUserCheck" class="size-4" />
         Register Resident
-      </button>
-
-      <button
-        type="button"
-        class="btn primary"
-        (click)="createUnit()">
-
-        Add New Unit
       </button>
     </div>
   </header>
@@ -45,130 +60,211 @@
     {{ successMessage }}
   </div>
 
-  <section class="summary-grid">
-    <article class="summary-card">
-      <span>Total Units</span>
-      <strong>{{ totalUnits }}</strong>
-      <small>Across all towers</small>
-    </article>
+  <section
+    class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4 *:data-[slot=card]:bg-linear-to-t *:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card *:data-[slot=card]:shadow-xs dark:*:data-[slot=card]:bg-card"
+  >
+    <z-card class="@container/card">
+      <z-card-header>
+        <z-card-description zDescription="Total Units" />
+        <z-card-title
+          class="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl"
+          zTitle="{{ totalUnits }}"
+        />
+        <z-card-action>
+          <z-badge zType="outline">
+            <ng-icon name="lucideTrendingUp" />
+            {{ occupancyRate }}%
+          </z-badge>
+        </z-card-action>
+      </z-card-header>
+      <z-card-footer class="flex-col items-start gap-1.5 text-sm">
+        <div class="line-clamp-1 flex items-center gap-2 font-medium">
+          {{ occupiedUnits }} occupied
+          <ng-icon name="lucideTrendingUp" class="size-4" />
+        </div>
+        <div class="text-muted-foreground">Across all towers</div>
+      </z-card-footer>
+    </z-card>
 
-    <article class="summary-card">
-      <span>Outstanding Debt</span>
-      <strong class="danger">{{ outstandingDebt }}</strong>
-      <small>Units with pending debt</small>
-    </article>
+    <z-card class="@container/card">
+      <z-card-header>
+        <z-card-description zDescription="Outstanding Debt" />
+        <z-card-title
+          class="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl"
+          [class.text-destructive]="outstandingDebt > 0"
+          zTitle="{{ outstandingDebt }}"
+        />
+        <z-card-action>
+          <z-badge zType="outline">
+            <ng-icon [name]="outstandingDebt > 0 ? 'lucideTrendingUp' : 'lucideTrendingDown'" />
+            {{ debtRate }}%
+          </z-badge>
+        </z-card-action>
+      </z-card-header>
+      <z-card-footer class="flex-col items-start gap-1.5 text-sm">
+        <div class="line-clamp-1 flex items-center gap-2 font-medium">
+          {{ outstandingDebt > 0 ? 'Follow up required' : 'All caught up' }}
+          <ng-icon
+            [name]="outstandingDebt > 0 ? 'lucideTrendingUp' : 'lucideTrendingDown'"
+            class="size-4"
+          />
+        </div>
+        <div class="text-muted-foreground">Units with pending debt</div>
+      </z-card-footer>
+    </z-card>
 
-    <article class="summary-card">
-      <span>New Move-ins</span>
-      <strong>{{ newMoveIns }}</strong>
-      <small>Pending verification</small>
-    </article>
+    <z-card class="@container/card">
+      <z-card-header>
+        <z-card-description zDescription="New Move-ins" />
+        <z-card-title
+          class="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl"
+          zTitle="{{ newMoveIns }}"
+        />
+        <z-card-action>
+          <z-badge zType="outline">
+            <ng-icon name="lucideTrendingUp" />
+            {{ moveInRate }}%
+          </z-badge>
+        </z-card-action>
+      </z-card-header>
+      <z-card-footer class="flex-col items-start gap-1.5 text-sm">
+        <div class="line-clamp-1 flex items-center gap-2 font-medium">
+          Pending verification
+          <ng-icon name="lucideTrendingUp" class="size-4" />
+        </div>
+        <div class="text-muted-foreground">New owners awaiting approval</div>
+      </z-card-footer>
+    </z-card>
 
-    <article class="summary-card">
-      <span>Maintenance</span>
-      <strong>{{ maintenanceRequests }}</strong>
-      <small>Active requests</small>
-    </article>
+    <z-card class="@container/card">
+      <z-card-header>
+        <z-card-description zDescription="Maintenance" />
+        <z-card-title
+          class="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl"
+          zTitle="{{ maintenanceRequests }}"
+        />
+        <z-card-action>
+          <z-badge zType="outline">
+            <ng-icon name="lucideTrendingUp" />
+            {{ maintenanceRate }}%
+          </z-badge>
+        </z-card-action>
+      </z-card-header>
+      <z-card-footer class="flex-col items-start gap-1.5 text-sm">
+        <div class="line-clamp-1 flex items-center gap-2 font-medium">
+          {{ maintenanceRequests > 0 ? 'Attention needed' : 'No open requests' }}
+          <ng-icon name="lucideTrendingUp" class="size-4" />
+        </div>
+        <div class="text-muted-foreground">Units in maintenance status</div>
+      </z-card-footer>
+    </z-card>
   </section>
 
-  <section class="table-card">
-    <table>
-      <thead>
-      <tr>
-        <th>Unit & Tower</th>
-        <th>Primary Resident</th>
-        <th>Status</th>
-        <th>Debt</th>
-        <th>Contact</th>
-        <th>Actions</th>
-      </tr>
+  <section class="overflow-x-auto rounded-lg border bg-card text-card-foreground shadow-xs">
+    <table z-table>
+      <thead z-table-header>
+        <tr z-table-row>
+          <th z-table-head scope="col">Unit & Tower</th>
+          <th z-table-head scope="col">Primary Resident</th>
+          <th z-table-head scope="col">Status</th>
+          <th z-table-head scope="col">Debt</th>
+          <th z-table-head scope="col">Contact</th>
+          <th z-table-head scope="col" class="text-end">Actions</th>
+        </tr>
       </thead>
 
-      <tbody>
-      <tr *ngFor="let row of rows">
-        <td>
-          <strong>Unit {{ row.unitNumber }}</strong>
-          <small>{{ row.tower }}</small>
-        </td>
+      <tbody z-table-body>
+        @for (row of rows; track row.unitId) {
+          <tr z-table-row>
+            <td z-table-cell>
+              <div class="font-medium">Unit {{ row.unitNumber }}</div>
+              <div class="text-muted-foreground text-xs">{{ row.tower }}</div>
+            </td>
 
-        <td>
-          <div class="resident-info">
-            <div class="avatar">
-              {{ row.residentName.charAt(0) }}
-            </div>
+            <td z-table-cell>
+              <div class="flex items-center gap-2">
+                <div
+                  class="bg-muted text-muted-foreground flex size-9 shrink-0 items-center justify-center rounded-full text-xs font-semibold uppercase"
+                >
+                  {{ row.residentName.charAt(0) }}
+                </div>
 
-            <div>
-              <strong>{{ row.residentName }}</strong>
-              <small>{{ row.residentRole }}</small>
-            </div>
-          </div>
+                <div>
+                  <div class="font-medium">{{ row.residentName }}</div>
+                  <div class="text-muted-foreground text-xs">{{ row.residentRole }}</div>
+                </div>
+              </div>
 
-          <div
-            class="failed-links"
-            *ngIf="row.failedLinks.length > 0">
+              <div
+                class="failed-links"
+                *ngIf="row.failedLinks.length > 0">
 
-            <div
-              class="failed-link"
-              *ngFor="let link of row.failedLinks">
+                <div
+                  class="failed-link"
+                  *ngFor="let link of row.failedLinks">
 
-              <span
-                class="badge failed"
-                [title]="link.reason ?? 'status: FAILED'">
-                FAILED
-              </span>
+                  <span
+                    class="badge failed"
+                    [title]="link.reason ?? 'status: FAILED'">
+                    FAILED
+                  </span>
 
-              <small class="failed-reason">
-                {{ link.reason ?? 'El vínculo no pudo completarse.' }}
-              </small>
-            </div>
-          </div>
-        </td>
+                  <small class="failed-reason">
+                    {{ link.reason ?? 'El vínculo no pudo completarse.' }}
+                  </small>
+                </div>
+              </div>
+            </td>
 
-        <td>
-            <span class="badge" [ngClass]="row.unitStatus.toLowerCase()">
-              {{ row.unitStatus }}
-            </span>
-        </td>
+            <td z-table-cell>
+              <z-badge [zType]="unitStatusBadgeType(row.unitStatus)">
+                {{ row.unitStatus }}
+              </z-badge>
+            </td>
 
-        <td>
-            <span class="badge" [ngClass]="row.debtStatus.toLowerCase()">
-              {{ row.debtLabel }}
-            </span>
-        </td>
+            <td z-table-cell>
+              <z-badge [zType]="debtBadgeType(row.debtStatus)">
+                {{ row.debtLabel }}
+              </z-badge>
+            </td>
 
-        <td>
-          <span>{{ row.email }}</span>
-          <small>{{ row.phone }}</small>
-        </td>
+            <td z-table-cell>
+              <div>{{ row.email }}</div>
+              <div class="text-muted-foreground text-xs">{{ row.phone }}</div>
+            </td>
 
-        <td>
-          <button class="edit-btn" (click)="editRow(row)">Edit</button>
-        </td>
-      </tr>
+            <td z-table-cell class="text-end">
+              <button z-button zType="outline" zSize="sm" type="button" (click)="editRow(row)">
+                Edit
+              </button>
+            </td>
+          </tr>
+        } @empty {
+          <tr z-table-row>
+            <td z-table-cell [attr.colspan]="6" class="text-muted-foreground h-24 text-center">
+              No units found.
+            </td>
+          </tr>
+        }
       </tbody>
     </table>
   </section>
 </div>
 <app-unit-form
-  *ngIf="
-    (isEditingUnit || isCreatingUnit) &&
-    selectedUnit
-  "
+  *ngIf="(isEditingUnit || isCreatingUnit) && selectedUnit"
   [unit]="selectedUnit"
   [isCreateMode]="isCreatingUnit"
-  (close)="onUnitFormClose($event)">
+  (close)="onUnitFormClose($event)"
+>
 </app-unit-form>
 
-<app-user-form
+<app-add-user-form
   *ngIf="isCreatingUser"
-  [user]="null"
-  [isCreateMode]="true"
-  (close)="onUserFormClose($event)">
-</app-user-form>
+  (close)="onUserFormClose($event)"
+>
+</app-add-user-form>
 
-<app-building-form
-  *ngIf="isCreatingBuilding"
-  (close)="onBuildingFormClose($event)">
+<app-building-form *ngIf="isCreatingBuilding" (close)="onBuildingFormClose($event)">
 </app-building-form>
 
 <app-resident-form

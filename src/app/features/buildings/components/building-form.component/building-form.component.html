@@ -1,168 +1,150 @@
-<div
-  class="modal-backdrop"
-  (click)="onCancel()">
+@let name = buildingForm.controls.name;
+@let nameInvalid = name.invalid && name.touched;
 
-  <div
-    class="modal-container"
-    (click)="$event.stopPropagation()">
+@let address = buildingForm.controls.address;
+@let addressInvalid = address.invalid && address.touched;
 
-    <header class="modal-header">
-      <div>
-        <h2>Create Building</h2>
-        <p>
-          Register a new residential building in Edifika.
-        </p>
-      </div>
+@let district = buildingForm.controls.district;
+@let districtInvalid = district.invalid && district.touched;
 
-      <button
-        type="button"
-        class="close-btn"
-        (click)="onCancel()"
-        [disabled]="isSubmitting">
+@let city = buildingForm.controls.city;
+@let cityInvalid = city.invalid && city.touched;
 
-        ×
-      </button>
-    </header>
+<z-dialog
+  [(zVisible)]="visible"
+  zWidth="640px"
+  [zClosable]="!isSubmitting"
+  [zMaskClosable]="!isSubmitting"
+  (zAfterClose)="onDialogClosed()"
+>
+  <z-dialog-header>
+    <z-dialog-title>Create Building</z-dialog-title>
+    <z-dialog-description>Register a new residential building in Edifika.</z-dialog-description>
+  </z-dialog-header>
 
-    <form
-      [formGroup]="buildingForm"
-      (ngSubmit)="onSubmit()"
-      class="form-body">
-
-      <div class="form-group">
-        <label for="name">
-          Building Name
-        </label>
+  <form
+    novalidate
+    autocomplete="off"
+    id="building-form"
+    [formGroup]="buildingForm"
+    (ngSubmit)="onSubmit()"
+    class="flex flex-col gap-4"
+  >
+    <div z-field-group>
+      <!-- Building name -->
+      <div z-field [attr.data-invalid]="nameInvalid || null">
+        <label z-field-label for="building-form-name"> Building Name </label>
 
         <input
-          id="name"
+          z-input
+          id="building-form-name"
           type="text"
           formControlName="name"
+          autocomplete="off"
           placeholder="Example: Tower A"
-          [class.is-invalid]="
-            buildingForm.get('name')?.invalid &&
-            buildingForm.get('name')?.touched
-          ">
+          [attr.aria-invalid]="nameInvalid || null"
+        />
 
-        <small
-          class="error-text"
-          *ngIf="
-            buildingForm.get('name')?.invalid &&
-            buildingForm.get('name')?.touched
-          ">
-          Building name must contain at least 3 characters.
-        </small>
+        @if (nameInvalid) {
+          <z-field-error>
+            @if (name.hasError('required') || name.hasError('minlength')) {
+              Building name must be at least 3 characters.
+            }
+          </z-field-error>
+        }
       </div>
 
-      <div class="form-group">
-        <label for="address">
-          Address
-        </label>
+      <!-- Address -->
+      <div z-field [attr.data-invalid]="addressInvalid || null">
+        <label z-field-label for="building-form-address"> Address </label>
 
         <input
-          id="address"
+          z-input
+          id="building-form-address"
           type="text"
           formControlName="address"
+          autocomplete="off"
           placeholder="Example: Av. Principal 123"
-          [class.is-invalid]="
-            buildingForm.get('address')?.invalid &&
-            buildingForm.get('address')?.touched
-          ">
+          [attr.aria-invalid]="addressInvalid || null"
+        />
 
-        <small
-          class="error-text"
-          *ngIf="
-            buildingForm.get('address')?.invalid &&
-            buildingForm.get('address')?.touched
-          ">
-          Enter a valid address.
-        </small>
+        @if (addressInvalid) {
+          <z-field-error>
+            @if (address.hasError('required') || address.hasError('minlength')) {
+              Enter a valid address (at least 5 characters).
+            }
+          </z-field-error>
+        }
       </div>
 
-      <div class="form-grid">
-        <div class="form-group">
-          <label for="district">
-            District
-          </label>
+      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <!-- District -->
+        <div z-field [attr.data-invalid]="districtInvalid || null">
+          <label z-field-label for="building-form-district"> District </label>
 
           <input
-            id="district"
+            z-input
+            id="building-form-district"
             type="text"
             formControlName="district"
+            autocomplete="off"
             placeholder="Example: Miraflores"
-            [class.is-invalid]="
-              buildingForm.get('district')?.invalid &&
-              buildingForm.get('district')?.touched
-            ">
+            [attr.aria-invalid]="districtInvalid || null"
+          />
 
-          <small
-            class="error-text"
-            *ngIf="
-              buildingForm.get('district')?.invalid &&
-              buildingForm.get('district')?.touched
-            ">
-            Enter a valid district.
-          </small>
+          @if (districtInvalid) {
+            <z-field-error>
+              @if (district.hasError('required') || district.hasError('minlength')) {
+                Enter a valid district.
+              }
+            </z-field-error>
+          }
         </div>
 
-        <div class="form-group">
-          <label for="city">
-            City
-          </label>
+        <!-- City -->
+        <div z-field [attr.data-invalid]="cityInvalid || null">
+          <label z-field-label for="building-form-city"> City </label>
 
           <input
-            id="city"
+            z-input
+            id="building-form-city"
             type="text"
             formControlName="city"
+            autocomplete="off"
             placeholder="Example: Lima"
-            [class.is-invalid]="
-              buildingForm.get('city')?.invalid &&
-              buildingForm.get('city')?.touched
-            ">
+            [attr.aria-invalid]="cityInvalid || null"
+          />
 
-          <small
-            class="error-text"
-            *ngIf="
-              buildingForm.get('city')?.invalid &&
-              buildingForm.get('city')?.touched
-            ">
-            Enter a valid city.
-          </small>
+          @if (cityInvalid) {
+            <z-field-error>
+              @if (city.hasError('required') || city.hasError('minlength')) {
+                Enter a valid city.
+              }
+            </z-field-error>
+          }
         </div>
       </div>
+    </div>
 
-      <p
-        class="general-error"
-        *ngIf="errorMessage">
-
+    @if (errorMessage) {
+      <p class="text-sm text-destructive" role="alert">
         {{ errorMessage }}
       </p>
+    }
+  </form>
 
-      <footer class="form-actions">
-        <button
-          type="button"
-          class="btn secondary"
-          (click)="onCancel()"
-          [disabled]="isSubmitting">
+  <z-dialog-footer>
+    <button z-button zType="outline" type="button" z-dialog-close [disabled]="isSubmitting">
+      Cancel
+    </button>
 
-          Cancel
-        </button>
-
-        <button
-          type="submit"
-          class="btn primary"
-          [disabled]="
-            buildingForm.invalid ||
-            isSubmitting
-          ">
-
-          {{
-            isSubmitting
-              ? 'Creating...'
-              : 'Create Building'
-          }}
-        </button>
-      </footer>
-    </form>
-  </div>
-</div>
+    <button
+      z-button
+      type="submit"
+      form="building-form"
+      [disabled]="buildingForm.invalid || isSubmitting"
+    >
+      {{ isSubmitting ? 'Creating…' : 'Create Building' }}
+    </button>
+  </z-dialog-footer>
+</z-dialog>

@@ -1,351 +1,320 @@
-<div class="modal-backdrop" (click)="onCancel()">
-  <div
-    class="modal-container"
-    (click)="$event.stopPropagation()">
+@let idBuilding = unitForm.controls.idBuilding;
+@let idBuildingInvalid = idBuilding.invalid && idBuilding.touched;
 
-    <header class="modal-header">
-      <div>
-        <h2>
-          {{ isCreateMode ? 'Create Unit' : 'Edit Unit' }}
-        </h2>
+@let unitNumber = unitForm.controls.unitNumber;
+@let unitNumberInvalid = unitNumber.invalid && unitNumber.touched;
 
-        <p>
-          {{
-            isCreateMode
-              ? 'Create a new unit and optionally assign an owner.'
-              : 'Update the information of the selected unit.'
-          }}
-        </p>
-      </div>
+@let floor = unitForm.controls.floor;
+@let floorInvalid = floor.invalid && floor.touched;
 
-      <button
-        class="close-btn"
-        type="button"
-        (click)="onCancel()"
-        [disabled]="isSaving">
-        ×
-      </button>
-    </header>
+@let coveredArea = unitForm.controls.coveredArea;
+@let coveredAreaInvalid = coveredArea.invalid && coveredArea.touched;
 
-    <form
-      [formGroup]="unitForm"
-      (ngSubmit)="onSubmit()"
-      class="form-body">
+@let totalArea = unitForm.controls.totalArea;
+@let totalAreaInvalid = totalArea.invalid && totalArea.touched;
+@let areaMismatch =
+  unitForm.hasError('totalAreaLessThanCoveredArea') &&
+  (totalArea.touched || coveredArea.touched);
 
-      <p
-        class="form-help"
-        *ngIf="isLoadingData">
-        Loading buildings and owners...
-      </p>
+@let participationPercentage = unitForm.controls.participationPercentage;
+@let participationPercentageInvalid =
+  participationPercentage.invalid && participationPercentage.touched;
 
-      <div class="form-grid">
+@let distributionPercentage = unitForm.controls.distributionPercentage;
+@let distributionPercentageInvalid =
+  distributionPercentage.invalid && distributionPercentage.touched;
 
-        <!-- Edificio -->
-        <div class="form-group">
-          <label for="idBuilding">
-            Building
-          </label>
+@let status = unitForm.controls.status;
+@let statusInvalid = status.invalid && status.touched;
 
-          <select
-            id="idBuilding"
-            formControlName="idBuilding">
+<z-dialog
+  [(zVisible)]="visible"
+  zWidth="720px"
+  [zClosable]="!isSaving"
+  [zMaskClosable]="!isSaving"
+  (zAfterClose)="onDialogClosed()"
+>
+  <z-dialog-header>
+    <z-dialog-title>{{ isCreateMode ? 'Create Unit' : 'Edit Unit' }}</z-dialog-title>
+    <z-dialog-description>
+      {{
+        isCreateMode
+          ? 'Create a new unit and optionally assign an owner.'
+          : 'Update the information of the selected unit.'
+      }}
+    </z-dialog-description>
+  </z-dialog-header>
 
-            <option [ngValue]="null">
-              Select a building
-            </option>
+  <form
+    novalidate
+    autocomplete="off"
+    id="unit-form"
+    [formGroup]="unitForm"
+    (ngSubmit)="onSubmit()"
+    class="flex flex-col gap-4"
+  >
+    @if (isLoadingData) {
+      <p class="text-sm text-muted-foreground">Loading buildings and owners...</p>
+    }
 
-            <option
-              *ngFor="let building of buildings"
-              [ngValue]="building.idBuilding">
+    <div z-field-group class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <!-- Building -->
+      <div z-field class="sm:col-span-2" [attr.data-invalid]="idBuildingInvalid || null">
+        <label z-field-label for="unit-form-idBuilding"> Building </label>
 
+        <z-select
+          formControlName="idBuilding"
+          id="unit-form-idBuilding"
+          class="w-full"
+          zPlaceholder="Select a building"
+          [zInvalid]="idBuildingInvalid"
+        >
+          @for (building of buildings; track building.idBuilding) {
+            <z-select-item [zValue]="building.idBuilding.toString()">
               {{ building.name }} — {{ building.district }}
-            </option>
-          </select>
+            </z-select-item>
+          }
+        </z-select>
 
-          <small
-            class="error-text"
-            *ngIf="
-              unitForm.get('idBuilding')?.invalid &&
-              unitForm.get('idBuilding')?.touched
-            ">
-            You must select a building.
-          </small>
+        @if (idBuildingInvalid) {
+          <z-field-error>
+            @if (idBuilding.hasError('required')) {
+              You must select a building.
+            }
+          </z-field-error>
+        }
 
-          <small
-            class="empty-message"
-            *ngIf="
-              !isLoadingData &&
-              buildings.length === 0
-            ">
+        @if (!isLoadingData && buildings.length === 0) {
+          <p class="text-sm text-destructive">
             No buildings are available. Create a building first.
-          </small>
-        </div>
-
-        <!-- Número -->
-        <div class="form-group">
-          <label for="unitNumber">
-            Unit Number
-          </label>
-
-          <input
-            id="unitNumber"
-            type="number"
-            min="0"
-            formControlName="unitNumber">
-
-          <small
-            class="error-text"
-            *ngIf="
-              unitForm.get('unitNumber')?.invalid &&
-              unitForm.get('unitNumber')?.touched
-            ">
-            Unit number is required.
-          </small>
-        </div>
-
-        <!-- Piso -->
-        <div class="form-group">
-          <label for="floor">
-            Floor
-          </label>
-
-          <input
-            id="floor"
-            type="number"
-            min="0"
-            formControlName="floor">
-
-          <small
-            class="error-text"
-            *ngIf="
-              unitForm.get('floor')?.invalid &&
-              unitForm.get('floor')?.touched
-            ">
-            Floor must be greater than or equal to 0.
-          </small>
-        </div>
-
-        <!-- Área cubierta -->
-        <div class="form-group">
-          <label for="coveredArea">
-            Covered Area
-          </label>
-
-          <input
-            id="coveredArea"
-            type="number"
-            min="0"
-            step="0.01"
-            formControlName="coveredArea">
-
-          <small
-            class="error-text"
-            *ngIf="
-              unitForm.get('coveredArea')?.invalid &&
-              unitForm.get('coveredArea')?.touched
-            ">
-            Covered area must be greater than or equal to 0.
-          </small>
-        </div>
-
-        <!-- Área total -->
-        <div class="form-group">
-          <label for="totalArea">
-            Total Area
-          </label>
-
-          <input
-            id="totalArea"
-            type="number"
-            min="0"
-            step="0.01"
-            formControlName="totalArea">
-
-          <small
-            class="error-text"
-            *ngIf="
-              unitForm.get('totalArea')?.invalid &&
-              unitForm.get('totalArea')?.touched
-            ">
-            Total area must be greater than or equal to 0.
-          </small>
-
-          <small
-            class="error-text"
-            *ngIf="
-              unitForm.hasError('totalAreaLessThanCoveredArea') &&
-              (
-                unitForm.get('totalArea')?.touched ||
-                unitForm.get('coveredArea')?.touched
-              )
-            ">
-            Total area must be greater than or equal to covered area.
-          </small>
-        </div>
-
-        <!-- Participación -->
-        <div class="form-group">
-          <label for="participationPercentage">
-            Participation %
-          </label>
-
-          <input
-            id="participationPercentage"
-            type="number"
-            min="0"
-            step="0.01"
-            formControlName="participationPercentage">
-
-          <small
-            class="error-text"
-            *ngIf="
-              unitForm.get('participationPercentage')?.invalid &&
-              unitForm.get('participationPercentage')?.touched
-            ">
-            Participation percentage must be valid.
-          </small>
-        </div>
-
-        <!-- Distribución -->
-        <div class="form-group">
-          <label for="distributionPercentage">
-            Distribution %
-          </label>
-
-          <input
-            id="distributionPercentage"
-            type="number"
-            min="0"
-            step="0.01"
-            formControlName="distributionPercentage">
-
-          <small
-            class="error-text"
-            *ngIf="
-              unitForm.get('distributionPercentage')?.invalid &&
-              unitForm.get('distributionPercentage')?.touched
-            ">
-            Distribution percentage must be valid.
-          </small>
-        </div>
-
-        <!-- Estado -->
-        <div class="form-group">
-          <label for="status">
-            Status
-          </label>
-
-          <select
-            id="status"
-            formControlName="status">
-
-            <option value="AVAILABLE">
-              AVAILABLE
-            </option>
-
-            <option value="OCCUPIED">
-              OCCUPIED
-            </option>
-
-            <option value="MAINTENANCE">
-              MAINTENANCE
-            </option>
-          </select>
-
-          <small
-            class="error-text"
-            *ngIf="
-              unitForm.get('status')?.invalid &&
-              unitForm.get('status')?.touched
-            ">
-            Status must be AVAILABLE, OCCUPIED or MAINTENANCE.
-          </small>
-        </div>
-
-        <!-- Propietario -->
-        <div
-          class="form-group"
-          *ngIf="isCreateMode">
-
-          <label for="idUser">
-            Owner
-          </label>
-
-          <select
-            id="idUser"
-            formControlName="idUser">
-
-            <option [ngValue]="null">
-              No Owner Assigned
-            </option>
-
-            <option
-              *ngFor="let owner of owners"
-              [ngValue]="owner.id">
-
-              {{ owner.fullName }} — {{ owner.email }}
-            </option>
-          </select>
-
-          <small class="form-help">
-            Only users with the OWNER role are displayed.
-          </small>
-
-          <small
-            class="empty-message"
-            *ngIf="
-              !isLoadingData &&
-              owners.length === 0
-            ">
-            No owners are available.
-          </small>
-        </div>
+          </p>
+        }
       </div>
 
-      <p
-        class="error-text general-error"
-        *ngIf="
-          unitForm.invalid &&
-          unitForm.touched
-        ">
-        Please verify the entered values.
-      </p>
+      <!-- Unit number -->
+      <div z-field [attr.data-invalid]="unitNumberInvalid || null">
+        <label z-field-label for="unit-form-unitNumber"> Unit Number </label>
 
-      <p
-        class="error-text general-error"
-        *ngIf="errorMessage">
+        <input
+          z-input
+          id="unit-form-unitNumber"
+          type="number"
+          min="1"
+          step="1"
+          formControlName="unitNumber"
+          placeholder="101"
+          [attr.aria-invalid]="unitNumberInvalid || null"
+        />
+
+        @if (unitNumberInvalid) {
+          <z-field-error>
+            @if (unitNumber.hasError('required') || unitNumber.hasError('min')) {
+              Unit number is required and must be at least 1.
+            }
+          </z-field-error>
+        }
+      </div>
+
+      <!-- Floor -->
+      <div z-field [attr.data-invalid]="floorInvalid || null">
+        <label z-field-label for="unit-form-floor"> Floor </label>
+
+        <input
+          z-input
+          id="unit-form-floor"
+          type="number"
+          min="0"
+          step="1"
+          formControlName="floor"
+          placeholder="1"
+          [attr.aria-invalid]="floorInvalid || null"
+        />
+
+        @if (floorInvalid) {
+          <z-field-error>
+            @if (floor.hasError('required') || floor.hasError('min')) {
+              Floor must be greater than or equal to 0.
+            }
+          </z-field-error>
+        }
+      </div>
+
+      <!-- Covered area -->
+      <div z-field [attr.data-invalid]="coveredAreaInvalid || null">
+        <label z-field-label for="unit-form-coveredArea"> Covered Area </label>
+
+        <input
+          z-input
+          id="unit-form-coveredArea"
+          type="number"
+          min="0"
+          step="0.01"
+          formControlName="coveredArea"
+          placeholder="75.50"
+          [attr.aria-invalid]="coveredAreaInvalid || null"
+        />
+
+        @if (coveredAreaInvalid) {
+          <z-field-error>
+            @if (coveredArea.hasError('required') || coveredArea.hasError('min')) {
+              Covered area must be greater than or equal to 0.
+            }
+          </z-field-error>
+        }
+      </div>
+
+      <!-- Total area -->
+      <div z-field [attr.data-invalid]="totalAreaInvalid || areaMismatch || null">
+        <label z-field-label for="unit-form-totalArea"> Total Area </label>
+
+        <input
+          z-input
+          id="unit-form-totalArea"
+          type="number"
+          min="0"
+          step="0.01"
+          formControlName="totalArea"
+          placeholder="90.00"
+          [attr.aria-invalid]="totalAreaInvalid || areaMismatch || null"
+        />
+
+        @if (totalAreaInvalid || areaMismatch) {
+          <z-field-error>
+            @if (totalArea.hasError('required') || totalArea.hasError('min')) {
+              Total area must be greater than or equal to 0.
+            } @else if (areaMismatch) {
+              Total area must be greater than or equal to covered area.
+            }
+          </z-field-error>
+        }
+      </div>
+
+      <!-- Participation percentage -->
+      <div z-field [attr.data-invalid]="participationPercentageInvalid || null">
+        <label z-field-label for="unit-form-participationPercentage"> Participation % </label>
+
+        <input
+          z-input
+          id="unit-form-participationPercentage"
+          type="number"
+          min="0"
+          step="0.01"
+          formControlName="participationPercentage"
+          placeholder="5.25"
+          [attr.aria-invalid]="participationPercentageInvalid || null"
+        />
+
+        @if (participationPercentageInvalid) {
+          <z-field-error>
+            @if (participationPercentage.hasError('required') || participationPercentage.hasError('min')) {
+              Participation percentage must be valid.
+            }
+          </z-field-error>
+        }
+      </div>
+
+      <!-- Distribution percentage -->
+      <div z-field [attr.data-invalid]="distributionPercentageInvalid || null">
+        <label z-field-label for="unit-form-distributionPercentage"> Distribution % </label>
+
+        <input
+          z-input
+          id="unit-form-distributionPercentage"
+          type="number"
+          min="0"
+          step="0.01"
+          formControlName="distributionPercentage"
+          placeholder="5.25"
+          [attr.aria-invalid]="distributionPercentageInvalid || null"
+        />
+
+        @if (distributionPercentageInvalid) {
+          <z-field-error>
+            @if (distributionPercentage.hasError('required') || distributionPercentage.hasError('min')) {
+              Distribution percentage must be valid.
+            }
+          </z-field-error>
+        }
+      </div>
+
+      <!-- Status -->
+      <div z-field [attr.data-invalid]="statusInvalid || null">
+        <label z-field-label for="unit-form-status"> Status </label>
+
+        <z-select
+          formControlName="status"
+          id="unit-form-status"
+          class="w-full"
+          zPlaceholder="Select a status"
+          [zInvalid]="statusInvalid"
+        >
+          <z-select-item zValue="AVAILABLE">AVAILABLE</z-select-item>
+          <z-select-item zValue="OCCUPIED">OCCUPIED</z-select-item>
+          <z-select-item zValue="MAINTENANCE">MAINTENANCE</z-select-item>
+        </z-select>
+
+        @if (statusInvalid) {
+          <z-field-error>
+            @if (status.hasError('required') || status.hasError('invalidStatus')) {
+              Status must be AVAILABLE, OCCUPIED or MAINTENANCE.
+            }
+          </z-field-error>
+        }
+      </div>
+
+      <!-- Owner (create mode only) -->
+      @if (isCreateMode) {
+        <div z-field class="sm:col-span-2">
+          <label z-field-label for="unit-form-idUser"> Owner </label>
+
+          <z-select
+            formControlName="idUser"
+            id="unit-form-idUser"
+            class="w-full"
+            zPlaceholder="No Owner Assigned"
+          >
+            <z-select-item zValue="0">No Owner Assigned</z-select-item>
+            @for (owner of owners; track owner.id) {
+              <z-select-item [zValue]="owner.id.toString()">
+                {{ owner.fullName }} — {{ owner.email }}
+              </z-select-item>
+            }
+          </z-select>
+
+          <p z-field-description>Only users with the OWNER role are displayed.</p>
+
+          @if (!isLoadingData && owners.length === 0) {
+            <p class="text-sm text-muted-foreground">No owners are available.</p>
+          }
+        </div>
+      }
+    </div>
+
+    @if (errorMessage) {
+      <p class="text-sm text-destructive" role="alert">
         {{ errorMessage }}
       </p>
+    }
+  </form>
 
-      <footer class="form-actions">
-        <button
-          type="button"
-          class="btn secondary"
-          (click)="onCancel()"
-          [disabled]="isSaving">
+  <z-dialog-footer>
+    <button z-button zType="outline" type="button" z-dialog-close [disabled]="isSaving">
+      Cancel
+    </button>
 
-          Cancel
-        </button>
-
-        <button
-          type="submit"
-          class="btn primary"
-          [disabled]="
-            unitForm.invalid ||
-            isSaving ||
-            isLoadingData ||
-            buildings.length === 0
-          ">
-
-          {{
-            isSaving
-              ? 'Saving...'
-              : isCreateMode
-                ? 'Create Unit'
-                : 'Save Changes'
-          }}
-        </button>
-      </footer>
-    </form>
-  </div>
-</div>
+    <button
+      z-button
+      type="submit"
+      form="unit-form"
+      [disabled]="unitForm.invalid || isSaving || isLoadingData || buildings.length === 0"
+    >
+      {{
+        isSaving
+          ? 'Saving...'
+          : isCreateMode
+            ? 'Create Unit'
+            : 'Save Changes'
+      }}
+    </button>
+  </z-dialog-footer>
+</z-dialog>

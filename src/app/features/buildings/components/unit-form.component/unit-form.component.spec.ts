@@ -79,6 +79,24 @@ describe('UnitFormComponent', () => {
     }).compileComponents();
 
     fixture = TestBed.createComponent(UnitFormComponent);
+
+    /*
+     * Required inputs: the component expects a `unit` object. In create mode
+     * an empty partial is enough to exercise the happy path.
+     */
+    fixture.componentRef.setInput('unit', {
+      idUnit: 0,
+      idBuilding: 0,
+      unitNumber: 0,
+      floor: 0,
+      coveredArea: 0,
+      totalArea: 0,
+      participationPercentage: 0,
+      distributionPercentage: 0,
+      status: 'AVAILABLE',
+    } as never);
+    fixture.componentRef.setInput('isCreateMode', true);
+
     component = fixture.componentInstance;
     component.isCreateMode = true;
     fixture.detectChanges();
