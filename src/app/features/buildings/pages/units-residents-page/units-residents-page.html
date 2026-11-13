@@ -145,86 +145,161 @@
     </z-card>
   </section>
 
-  <table
-    z-table
-    class="block w-full overflow-x-auto rounded-lg border bg-card text-card-foreground shadow-xs"
+  @if (selectedCount > 0) {
+    <div
+      class="flex items-center justify-between rounded-lg border bg-muted/40 px-4 py-2 text-sm"
+      role="status"
+    >
+      <span class="text-muted-foreground">
+        <span class="font-medium text-foreground tabular-nums">{{ selectedCount }}</span>
+        {{ selectedCount === 1 ? 'unit' : 'units' }} selected
+      </span>
+      <button type="button" z-button zType="ghost" zSize="sm" (click)="clearSelection()">
+        Clear selection
+      </button>
+    </div>
+  }
+
+  <div
+    class="overflow-x-auto rounded-xl border bg-card text-card-foreground shadow-xs"
   >
-    <thead z-table-header>
-      <tr z-table-row>
-        <th z-table-head scope="col">Unit & Tower</th>
-        <th z-table-head scope="col">Primary Resident</th>
-        <th z-table-head scope="col">Status</th>
-        <th z-table-head scope="col">Debt</th>
-        <th z-table-head scope="col">Contact</th>
-        <th z-table-head scope="col" class="text-end">Actions</th>
-      </tr>
-    </thead>
+    <table z-table class="w-full min-w-[880px] border-collapse text-sm">
+      <thead z-table-header class="bg-muted/60">
+        <tr z-table-row class="border-b hover:bg-transparent">
+          <th z-table-head scope="col" class="w-12">
+            <span class="sr-only">Reorder</span>
+          </th>
+          <th z-table-head scope="col" class="w-12">
+            <input
+              type="checkbox"
+              role="checkbox"
+              class="size-4 cursor-pointer rounded accent-primary align-middle"
+              [checked]="allSelected"
+              [indeterminate]="!allSelected && someSelected"
+              aria-label="Select all units"
+              (change)="toggleAll($any($event.target).checked)"
+            />
+          </th>
+          <th z-table-head scope="col">Unit</th>
+          <th z-table-head scope="col">Building</th>
+          <th z-table-head scope="col">Status</th>
+          <th z-table-head scope="col" class="text-center">Floor</th>
+          <th z-table-head scope="col" class="text-center">Area m²</th>
+          <th z-table-head scope="col">Debt</th>
+          <th z-table-head scope="col">Resident</th>
+          <th z-table-head scope="col" class="w-12">
+            <span class="sr-only">Actions</span>
+          </th>
+        </tr>
+      </thead>
 
-    <tbody z-table-body>
-      @for (row of rows; track row.unitId) {
-        <tr z-table-row>
-          <td z-table-cell>
-            <div class="font-medium">Unit {{ row.unitNumber }}</div>
-            <div class="text-muted-foreground text-xs">{{ row.tower }}</div>
-          </td>
-
-          <td z-table-cell>
-            <div class="flex items-center gap-2">
-              <div
-                class="bg-muted text-muted-foreground flex size-9 shrink-0 items-center justify-center rounded-full text-xs font-semibold uppercase"
+      <tbody z-table-body cdkDropList (cdkDropListDropped)="onDrop($event)">
+        @for (row of rows; track row.unitId) {
+          <tr
+            z-table-row
+            cdkDrag
+            [attr.data-state]="isRowSelected(row) ? 'selected' : null"
+            class="border-b last:border-0 data-[state=selected]:bg-muted/50"
+          >
+            <td z-table-cell class="w-12">
+              <button
+                type="button"
+                cdkDragHandle
+                aria-label="Drag to reorder"
+                class="text-muted-foreground/60 hover:text-muted-foreground inline-flex size-7 cursor-grab items-center justify-center rounded-md transition-colors active:cursor-grabbing"
               >
-                {{ row.residentName.charAt(0) }}
+                <ng-icon name="lucideGripVertical" class="size-4" />
+              </button>
+            </td>
+
+            <td z-table-cell class="w-12">
+              <input
+                type="checkbox"
+                role="checkbox"
+                class="size-4 cursor-pointer rounded accent-primary align-middle"
+                [checked]="isRowSelected(row)"
+                [attr.aria-label]="'Select unit ' + row.unitNumber"
+                (change)="toggleRow(row, $any($event.target).checked)"
+              />
+            </td>
+
+            <td z-table-cell>
+              <div class="font-medium">Unit {{ row.unitNumber }}</div>
+            </td>
+
+            <td z-table-cell>
+              <z-badge zType="outline">{{ row.tower }}</z-badge>
+            </td>
+
+            <td z-table-cell>
+              @let pill = statusPill(row.unitStatus);
+              <span
+                class="inline-flex w-fit shrink-0 items-center gap-1.5 rounded-full border bg-transparent px-2 py-0.5 text-xs font-medium whitespace-nowrap {{ pill.classes }}"
+              >
+                <ng-icon [name]="pill.icon" class="size-3.5" />
+                {{ pill.label }}
+              </span>
+            </td>
+
+            <td z-table-cell class="text-center tabular-nums">{{ row.floor }}</td>
+
+            <td z-table-cell class="text-center tabular-nums">{{ row.totalArea }}</td>
+
+            <td z-table-cell>
+              <z-badge [zType]="debtBadgeType(row.debtStatus)">
+                {{ row.debtLabel }}
+              </z-badge>
+            </td>
+
+            <td z-table-cell>
+              <div class="font-medium">{{ row.residentName }}</div>
+              <div class="text-muted-foreground text-xs">
+                {{ row.residentRole }} · {{ row.email }}
               </div>
 
-              <div>
-                <div class="font-medium">{{ row.residentName }}</div>
-                <div class="text-muted-foreground text-xs">{{ row.residentRole }}</div>
+              <div class="failed-links" *ngIf="row.failedLinks.length > 0">
+                <div class="failed-link" *ngFor="let link of row.failedLinks">
+                  <span class="badge failed" [title]="link.reason ?? 'status: FAILED'"> FAILED </span>
+
+                  <small class="failed-reason">
+                    {{ link.reason ?? 'El vínculo no pudo completarse.' }}
+                  </small>
+                </div>
               </div>
-            </div>
+            </td>
 
-            <div class="failed-links" *ngIf="row.failedLinks.length > 0">
-              <div class="failed-link" *ngFor="let link of row.failedLinks">
-                <span class="badge failed" [title]="link.reason ?? 'status: FAILED'"> FAILED </span>
+            <td z-table-cell class="w-12 text-end">
+              <button
+                type="button"
+                z-button
+                zType="ghost"
+                zSize="icon"
+                class="text-muted-foreground"
+                z-dropdown
+                [zDropdownMenu]="rowMenu"
+                aria-label="Row actions"
+              >
+                <ng-icon name="lucideEllipsisVertical" class="size-4" />
+              </button>
 
-                <small class="failed-reason">
-                  {{ link.reason ?? 'El vínculo no pudo completarse.' }}
-                </small>
-              </div>
-            </div>
-          </td>
-
-          <td z-table-cell>
-            <z-badge [zType]="unitStatusBadgeType(row.unitStatus)">
-              {{ row.unitStatus }}
-            </z-badge>
-          </td>
-
-          <td z-table-cell>
-            <z-badge [zType]="debtBadgeType(row.debtStatus)">
-              {{ row.debtLabel }}
-            </z-badge>
-          </td>
-
-          <td z-table-cell>
-            <div>{{ row.email }}</div>
-            <div class="text-muted-foreground text-xs">{{ row.phone }}</div>
-          </td>
-
-          <td z-table-cell class="text-end">
-            <button z-button zType="outline" zSize="sm" type="button" (click)="editRow(row)">
-              Edit
-            </button>
-          </td>
-        </tr>
-      } @empty {
-        <tr z-table-row>
-          <td z-table-cell [attr.colspan]="6" class="text-muted-foreground h-24 text-center">
-            No units found.
-          </td>
-        </tr>
-      }
-    </tbody>
-  </table>
+              <z-dropdown-menu-content #rowMenu="zDropdownMenuContent" zAlign="end" class="w-44">
+                <z-dropdown-menu-item (click)="editRow(row)">
+                  <ng-icon name="lucidePencil" />
+                  Edit unit
+                </z-dropdown-menu-item>
+              </z-dropdown-menu-content>
+            </td>
+          </tr>
+        } @empty {
+          <tr z-table-row>
+            <td z-table-cell [attr.colspan]="10" class="text-muted-foreground h-24 text-center">
+              No units found.
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
 </div>
 <app-unit-form
   *ngIf="(isEditingUnit || isCreatingUnit) && selectedUnit"
