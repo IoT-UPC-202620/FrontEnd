@@ -32,7 +32,7 @@
 
 .logo .material-icons {
   font-size: 40px;
-  color: #8B088F;
+  color: #8b088f;
 }
 
 .logo-text {
@@ -44,7 +44,7 @@
   font-family: 'Sulphur Point', 'Inter', sans-serif;
   font-weight: 700;
   font-size: 24px;
-  color: #8B088F;
+  color: #8b088f;
   line-height: 1.1;
 }
 
@@ -73,7 +73,7 @@
   padding: 13px 16px;
   border-radius: 10px;
   text-decoration: none;
-  color: #52424F;
+  color: #52424f;
   font-family: 'Inter', sans-serif;
   font-size: 14px;
   font-weight: 500;
@@ -137,7 +137,6 @@
 .content {
   flex: 1;
   margin-left: 260px;
-  background: #f8f5f7;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -179,7 +178,7 @@
 
 .topbar-btn .material-icons-outlined {
   font-size: 24px;
-  color: #52424F;
+  color: #52424f;
 }
 
 .user-avatar {
