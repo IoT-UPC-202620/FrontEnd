@@ -1,17 +1,25 @@
 import {
+  CommonModule,
+} from '@angular/common';
+
+import {
   Component,
   EventEmitter,
   Output,
-  inject
+  inject,
+  signal
 } from '@angular/core';
-
-import { CommonModule } from '@angular/common';
 
 import {
   FormBuilder,
   ReactiveFormsModule,
   Validators
 } from '@angular/forms';
+
+import { ZardButtonComponent } from '@/shared/components/button';
+import { ZardDialogImports } from '@/shared/components/dialog/dialog.imports';
+import { ZardFieldImports } from '@/shared/components/field';
+import { ZardInputComponent } from '@/shared/components/input';
 
 import { BuildingsService } from '../../services/buildings.service';
 import { CreateBuildingResource } from '../../model/create-building-resource.model';
@@ -21,22 +29,21 @@ import { CreateBuildingResource } from '../../model/create-building-resource.mod
   standalone: true,
   imports: [
     CommonModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    ZardButtonComponent,
+    ...ZardDialogImports,
+    ...ZardFieldImports,
+    ZardInputComponent,
   ],
   templateUrl: './building-form.component.html',
-  styleUrl: './building-form.component.css'
 })
 export class BuildingFormComponent {
+  @Output() readonly close = new EventEmitter<boolean>();
 
-  private fb = inject(FormBuilder);
-  private buildingsService = inject(BuildingsService);
+  private readonly fb = inject(FormBuilder);
+  private readonly buildingsService = inject(BuildingsService);
 
-  @Output() close = new EventEmitter<boolean>();
-
-  isSubmitting = false;
-  errorMessage = '';
-
-  buildingForm = this.fb.group({
+  protected readonly buildingForm = this.fb.nonNullable.group({
     name: [
       '',
       [
@@ -70,7 +77,14 @@ export class BuildingFormComponent {
     ]
   });
 
-  onSubmit(): void {
+  protected readonly visible = signal(true);
+
+  isSubmitting = false;
+  errorMessage = '';
+
+  private result = false;
+
+  protected onSubmit(): void {
     if (this.buildingForm.invalid) {
       this.buildingForm.markAllAsTouched();
       return;
@@ -82,33 +96,33 @@ export class BuildingFormComponent {
     const value = this.buildingForm.getRawValue();
 
     const resource: CreateBuildingResource = {
-      name: value.name?.trim() ?? '',
-      address: value.address?.trim() ?? '',
-      district: value.district?.trim() ?? '',
-      city: value.city?.trim() ?? ''
+      name: value.name.trim(),
+      address: value.address.trim(),
+      district: value.district.trim(),
+      city: value.city.trim()
     };
 
     this.buildingsService.createBuilding(resource).subscribe({
       next: () => {
         this.isSubmitting = false;
-        this.close.emit(true);
+        this.result = true;
+        this.visible.set(false);
       },
 
       error: error => {
         console.error('Error creating building:', error);
 
         this.isSubmitting = false;
+
         this.errorMessage =
-          'No se pudo crear el edificio. Verifica los datos y permisos.';
-      }
+          error?.error?.message ??
+          error?.error?.error ??
+          'Could not create the building. Check the data and permissions.';
+      },
     });
   }
 
-  onCancel(): void {
-    if (this.isSubmitting) {
-      return;
-    }
-
-    this.close.emit(false);
+  protected onDialogClosed(): void {
+    this.close.emit(this.result);
   }
 }

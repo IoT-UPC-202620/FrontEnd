@@ -1,16 +1,22 @@
 import {
+  CommonModule,
+} from '@angular/common';
+import { HttpErrorResponse } from '@angular/common/http';
+
+import {
   Component,
   EventEmitter,
   Input,
   OnInit,
-  Output
+  Output,
+  inject,
+  signal
 } from '@angular/core';
 
-import { CommonModule } from '@angular/common';
-import { HttpErrorResponse } from '@angular/common/http';
 import {
   AbstractControl,
   FormBuilder,
+  FormControl,
   FormGroup,
   ReactiveFormsModule,
   ValidationErrors,
@@ -18,6 +24,12 @@ import {
 } from '@angular/forms';
 
 import { forkJoin } from 'rxjs';
+
+import { ZardButtonComponent } from '@/shared/components/button';
+import { ZardDialogImports } from '@/shared/components/dialog/dialog.imports';
+import { ZardFieldImports } from '@/shared/components/field';
+import { ZardInputComponent } from '@/shared/components/input';
+import { ZardSelectImports } from '@/shared/components/select';
 
 import { Unit } from '../../model/unit.model';
 import { Building } from '../../model/building.model';
@@ -31,23 +43,39 @@ import { BuildingsService } from '../../services/buildings.service';
 import { UserUnitsService } from '../../services/user-units.service';
 import { UsersService } from '../../../users/services/users.service';
 
+type UnitFormControls = {
+  idBuilding: FormControl<string>;
+  unitNumber: FormControl<number>;
+  floor: FormControl<number>;
+  coveredArea: FormControl<number>;
+  totalArea: FormControl<number>;
+  participationPercentage: FormControl<number>;
+  distributionPercentage: FormControl<number>;
+  status: FormControl<string>;
+  idUser: FormControl<string>;
+};
+
 @Component({
   selector: 'app-unit-form',
   standalone: true,
   imports: [
     CommonModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    ZardButtonComponent,
+    ...ZardDialogImports,
+    ...ZardFieldImports,
+    ZardInputComponent,
+    ...ZardSelectImports,
   ],
   templateUrl: './unit-form.component.html',
-  styleUrl: './unit-form.component.css'
 })
 export class UnitFormComponent implements OnInit {
   @Input() unit!: Unit;
   @Input() isCreateMode = false;
 
-  @Output() close = new EventEmitter<boolean>();
+  @Output() readonly close = new EventEmitter<boolean>();
 
-  unitForm!: FormGroup;
+  unitForm!: FormGroup<UnitFormControls>;
 
   owners: User[] = [];
   buildings: Building[] = [];
@@ -56,19 +84,21 @@ export class UnitFormComponent implements OnInit {
   isLoadingData = false;
   errorMessage = '';
 
+  protected readonly visible = signal(true);
+
+  private result = false;
+
   private readonly validStatuses = [
     'AVAILABLE',
     'OCCUPIED',
     'MAINTENANCE'
   ];
 
-  constructor(
-    private fb: FormBuilder,
-    private unitsService: UnitsService,
-    private buildingsService: BuildingsService,
-    private userUnitsService: UserUnitsService,
-    private usersService: UsersService
-  ) {}
+  private readonly fb = inject(FormBuilder);
+  private readonly unitsService = inject(UnitsService);
+  private readonly buildingsService = inject(BuildingsService);
+  private readonly userUnitsService = inject(UserUnitsService);
+  private readonly usersService = inject(UsersService);
 
   ngOnInit(): void {
     this.buildForm();
@@ -78,16 +108,15 @@ export class UnitFormComponent implements OnInit {
   buildForm(): void {
     const currentBuildingId =
       this.unit?.idBuilding && this.unit.idBuilding > 0
-        ? this.unit.idBuilding
-        : null;
+        ? String(this.unit.idBuilding)
+        : '';
 
-    this.unitForm = this.fb.group(
+    this.unitForm = this.fb.nonNullable.group(
       {
         idBuilding: [
           currentBuildingId,
           [
-            Validators.required,
-            Validators.min(1)
+            Validators.required
           ]
         ],
 
@@ -147,7 +176,7 @@ export class UnitFormComponent implements OnInit {
           ]
         ],
 
-        idUser: [null]
+        idUser: ['0']
       },
       {
         validators: this.areaValidator
@@ -180,7 +209,7 @@ export class UnitFormComponent implements OnInit {
           this.buildings.length === 1
         ) {
           this.unitForm.patchValue({
-            idBuilding: this.buildings[0].idBuilding
+            idBuilding: String(this.buildings[0].idBuilding)
           });
         }
 
@@ -194,7 +223,7 @@ export class UnitFormComponent implements OnInit {
         );
 
         this.errorMessage =
-          'No se pudieron cargar los edificios o propietarios.';
+          'Could not load the buildings or owners.';
 
         this.isLoadingData = false;
       }
@@ -258,8 +287,8 @@ export class UnitFormComponent implements OnInit {
 
         this.errorMessage =
           error?.status === 403
-            ? 'No tienes autorización para crear unidades.'
-            : 'No se pudo crear la unidad. Verifica los datos ingresados.';
+            ? 'You are not authorized to create units.'
+            : 'Could not create the unit. Check the entered data.';
 
         this.isSaving = false;
       }
@@ -307,7 +336,7 @@ export class UnitFormComponent implements OnInit {
 
     if (!Number.isFinite(idUnit) || idUnit <= 0) {
       this.errorMessage =
-        'No se puede actualizar la unidad porque no tiene un ID valido.';
+        'The unit cannot be updated because it does not have a valid ID.';
 
       this.isSaving = false;
       return;
@@ -339,7 +368,7 @@ export class UnitFormComponent implements OnInit {
           );
 
           this.errorMessage =
-            'No se pudo actualizar la unidad. Verifica los datos ingresados.';
+            'Could not update the unit. Check the entered data.';
 
           this.isSaving = false;
         }
@@ -348,15 +377,12 @@ export class UnitFormComponent implements OnInit {
 
   finish(): void {
     this.isSaving = false;
-    this.close.emit(true);
+    this.result = true;
+    this.visible.set(false);
   }
 
-  onCancel(): void {
-    if (this.isSaving) {
-      return;
-    }
-
-    this.close.emit(false);
+  protected onDialogClosed(): void {
+    this.close.emit(this.result);
   }
 
   private buildUnitResource(): UpdateUnitResource {

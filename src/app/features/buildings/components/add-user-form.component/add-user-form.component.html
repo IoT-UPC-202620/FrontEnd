@@ -1,0 +1,180 @@
+@let fullName = userForm.controls.fullName;
+@let fullNameInvalid = fullName.invalid && fullName.touched;
+
+@let email = userForm.controls.email;
+@let emailInvalid = email.invalid && email.touched;
+
+@let phone = userForm.controls.phone;
+@let phoneInvalid = phone.invalid && phone.touched;
+
+@let documentType = userForm.controls.documentType;
+@let documentTypeInvalid = documentType.invalid && documentType.touched;
+
+@let documentNumber = userForm.controls.documentNumber;
+@let documentNumberInvalid = documentNumber.invalid && documentNumber.touched;
+
+<z-dialog
+  [(zVisible)]="visible"
+  zWidth="640px"
+  [zClosable]="!isSubmitting"
+  [zMaskClosable]="!isSubmitting"
+  (zAfterClose)="onDialogClosed()"
+>
+  <z-dialog-header>
+    <z-dialog-title>Add New User</z-dialog-title>
+    <z-dialog-description>Register a new owner in Edifika.</z-dialog-description>
+  </z-dialog-header>
+
+  <form
+    novalidate
+    autocomplete="off"
+    id="add-user-form"
+    [formGroup]="userForm"
+    (ngSubmit)="onSubmit()"
+    class="flex flex-col gap-4"
+  >
+    <div z-field-group>
+      <!-- Full name -->
+      <div z-field [attr.data-invalid]="fullNameInvalid || null">
+        <label z-field-label for="add-user-fullName"> Full Name </label>
+
+        <input
+          z-input
+          id="add-user-fullName"
+          type="text"
+          formControlName="fullName"
+          autocomplete="off"
+          placeholder="Example: Jane Pérez"
+          [attr.aria-invalid]="fullNameInvalid || null"
+        />
+
+        @if (fullNameInvalid) {
+          <z-field-error>
+            @if (fullName.hasError('required') || fullName.hasError('minlength')) {
+              Name must be at least 3 characters.
+            }
+          </z-field-error>
+        }
+      </div>
+
+      <!-- Email -->
+      <div z-field [attr.data-invalid]="emailInvalid || null">
+        <label z-field-label for="add-user-email"> Email </label>
+
+        <input
+          z-input
+          id="add-user-email"
+          type="email"
+          formControlName="email"
+          autocomplete="off"
+          placeholder="user@edifika.com"
+          [attr.aria-invalid]="emailInvalid || null"
+        />
+
+        @if (emailInvalid) {
+          <z-field-error>
+            @if (email.hasError('required')) {
+              Email is required.
+            } @else if (email.hasError('email')) {
+              Enter a valid email address.
+            }
+          </z-field-error>
+        }
+      </div>
+
+      <!-- Phone -->
+      <div z-field [attr.data-invalid]="phoneInvalid || null">
+        <label z-field-label for="add-user-phone"> Phone </label>
+
+        <input
+          z-input
+          id="add-user-phone"
+          type="tel"
+          formControlName="phone"
+          autocomplete="off"
+          placeholder="987654321"
+          maxlength="15"
+          [attr.aria-invalid]="phoneInvalid || null"
+        />
+
+        @if (phoneInvalid) {
+          <z-field-error>
+            @if (phone.hasError('required') || phone.hasError('pattern')) {
+              Phone must contain between 7 and 15 digits.
+            }
+          </z-field-error>
+        }
+      </div>
+
+      <!-- Document type -->
+      <div z-field [attr.data-invalid]="documentTypeInvalid || null">
+        <label z-field-label for="add-user-documentType"> Document Type </label>
+
+        <z-select
+          formControlName="documentType"
+          id="add-user-documentType"
+          class="w-full"
+          zPlaceholder="Select"
+          [zInvalid]="documentTypeInvalid"
+        >
+          <z-select-item zValue="DNI">DNI</z-select-item>
+          <z-select-item zValue="CE">Carné de extranjería</z-select-item>
+          <z-select-item zValue="PASSPORT">Pasaporte</z-select-item>
+        </z-select>
+
+        @if (documentTypeInvalid) {
+          <z-field-error>
+            @if (documentType.hasError('required')) {
+              Select a document type.
+            }
+          </z-field-error>
+        }
+      </div>
+
+      <!-- Document number -->
+      <div z-field [attr.data-invalid]="documentNumberInvalid || null">
+        <label z-field-label for="add-user-documentNumber"> Document Number </label>
+
+        <input
+          z-input
+          id="add-user-documentNumber"
+          type="text"
+          formControlName="documentNumber"
+          autocomplete="off"
+          placeholder="12345678"
+          maxlength="20"
+          [attr.aria-invalid]="documentNumberInvalid || null"
+        />
+
+        @if (documentNumberInvalid) {
+          <z-field-error>
+            @if (documentNumber.hasError('required') || documentNumber.hasError('pattern')) {
+              Enter a valid document number.
+            }
+          </z-field-error>
+        }
+      </div>
+    </div>
+
+    @if (errorMessage) {
+      <p class="text-sm text-destructive" role="alert">
+        {{ errorMessage }}
+      </p>
+    }
+  </form>
+
+  <z-dialog-footer>
+    <button z-button zType="outline" type="button" z-dialog-close [disabled]="isSubmitting">
+      Cancel
+    </button>
+
+    <button
+      z-button
+      type="submit"
+      form="add-user-form"
+      [disabled]="userForm.invalid || isSubmitting"
+    >
+      {{ isSubmitting ? 'Creating…' : 'Create User' }}
+    </button>
+  </z-dialog-footer>
+</z-dialog>
