@@ -121,98 +121,88 @@
       </button>
     </div>
 
-    <form (ngSubmit)="createReservation()" class="flex flex-col gap-4">
-      <div class="flex flex-col gap-1.5">
-        <label for="residentId" class="text-sm font-medium text-muted-foreground">Resident</label>
-
-        <select
-          id="residentId"
-          [(ngModel)]="reservationForm.residentId"
-          name="residentId"
-          required
-          class="h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50">
-
-          <option [ngValue]="null" disabled>
-            Select resident
-          </option>
-
-          <option
-            *ngFor="let user of users"
-            [ngValue]="user.id">
-
-            {{ user.fullName }} — {{ user.roles[0] }}
-          </option>
-        </select>
-
-        <small
-          class="text-xs text-muted-foreground"
-          *ngIf="users.length === 0">
-
-          No active residents are assigned to a unit.
-        </small>
+    <form novalidate [formGroup]="reservationForm" (ngSubmit)="createReservation()" class="flex flex-col gap-4">
+      @let residentId = reservationForm.controls.residentId;
+      @let residentIdInvalid = residentId.invalid && residentId.touched;
+      <div z-field [attr.data-invalid]="residentIdInvalid || null">
+        <label z-field-label for="residentId">Resident</label>
+        <z-select id="residentId" formControlName="residentId" zPlaceholder="Select resident" [zInvalid]="residentIdInvalid">
+          @for (user of users; track user.id) {
+            <z-select-item [zValue]="user.id.toString()">{{ user.fullName }} — {{ user.roles[0] }}</z-select-item>
+          }
+        </z-select>
+        @if (residentIdInvalid) {
+          <z-field-error>Please select a resident.</z-field-error>
+        }
+        @if (users.length === 0) {
+          <p z-field-description>No active residents are assigned to a unit.</p>
+        }
       </div>
 
-      <div class="flex flex-col gap-1.5">
-        <label for="commonAreaId" class="text-sm font-medium text-muted-foreground">Common Area</label>
-
-        <select
-          id="commonAreaId"
-          [(ngModel)]="reservationForm.commonAreaId"
-          name="commonAreaId"
-          required
-          class="h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50">
-
-          <option [ngValue]="null" disabled>
-            Select common area
-          </option>
-
-          <option
-            *ngFor="let area of commonAreas"
-            [ngValue]="area.id">
-
-            {{ area.name }}
-          </option>
-        </select>
+      @let commonAreaId = reservationForm.controls.commonAreaId;
+      @let commonAreaIdInvalid = commonAreaId.invalid && commonAreaId.touched;
+      <div z-field [attr.data-invalid]="commonAreaIdInvalid || null">
+        <label z-field-label for="commonAreaId">Common Area</label>
+        <z-select id="commonAreaId" formControlName="commonAreaId" zPlaceholder="Select common area" [zInvalid]="commonAreaIdInvalid">
+          @for (area of commonAreas; track area.id) {
+            <z-select-item [zValue]="area.id.toString()">{{ area.name }}</z-select-item>
+          }
+        </z-select>
+        @if (commonAreaIdInvalid) {
+          <z-field-error>Please select a common area.</z-field-error>
+        }
       </div>
 
-      <div class="flex flex-col gap-1.5">
-        <label for="reservationDate" class="text-sm font-medium text-muted-foreground">Reservation Date</label>
+      @let reservationDate = reservationForm.controls.reservationDate;
+      @let reservationDateInvalid = reservationDate.invalid && reservationDate.touched;
+      <div z-field [attr.data-invalid]="reservationDateInvalid || null">
+        <label z-field-label for="reservationDate">Reservation Date</label>
         <input
+          z-input
           type="date"
           id="reservationDate"
           [min]="todayDate"
-          [(ngModel)]="reservationForm.reservationDate"
-          name="reservationDate"
-          required
-          class="h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50">
+          formControlName="reservationDate"
+          [attr.aria-invalid]="reservationDateInvalid || null">
+        @if (reservationDateInvalid) {
+          <z-field-error>Please select a reservation date.</z-field-error>
+        }
       </div>
 
-      <div class="flex flex-col gap-1.5">
-        <label for="timeSlot" class="text-sm font-medium text-muted-foreground">Time Slot</label>
+      @let timeSlot = reservationForm.controls.timeSlot;
+      @let timeSlotInvalid = timeSlot.invalid && timeSlot.touched;
+      <div z-field [attr.data-invalid]="timeSlotInvalid || null">
+        <label z-field-label for="timeSlot">Time Slot</label>
         <input
+          z-input
           type="number"
           id="timeSlot"
           min="0"
           max="23"
           step="1"
-          [(ngModel)]="reservationForm.timeSlot"
-          name="timeSlot"
-          required
-          class="h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50">
+          formControlName="timeSlot"
+          [attr.aria-invalid]="timeSlotInvalid || null">
+        @if (timeSlotInvalid) {
+          <z-field-error>Time slot must be a whole number between 0 and 23.</z-field-error>
+        }
       </div>
 
-      <div class="flex flex-col gap-1.5">
-        <label for="numberOfGuests" class="text-sm font-medium text-muted-foreground">Number of Guests</label>
+      @let numberOfGuests = reservationForm.controls.numberOfGuests;
+      @let numberOfGuestsInvalid = numberOfGuests.invalid && numberOfGuests.touched;
+      <div z-field [attr.data-invalid]="numberOfGuestsInvalid || null">
+        <label z-field-label for="numberOfGuests">Number of Guests</label>
         <input
+          z-input
           type="number"
           id="numberOfGuests"
           min="1"
           [max]="selectedAreaCapacity"
           step="1"
-          [(ngModel)]="reservationForm.numberOfGuests"
-          name="numberOfGuests"
-          required
-          class="h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50">
+          formControlName="numberOfGuests"
+          [attr.aria-invalid]="numberOfGuestsInvalid || null">
+        @if (numberOfGuestsInvalid) {
+          <z-field-error>Number of guests must be at least 1.</z-field-error>
+        }
       </div>
 
       <p class="text-sm font-medium text-destructive" *ngIf="reservationError">

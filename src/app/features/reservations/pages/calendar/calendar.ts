@@ -46,7 +46,11 @@ import {
 } from 'angular-calendar';
 
 import { EventColor } from 'calendar-utils';
-import { FormsModule } from '@angular/forms';
+import {
+  FormBuilder,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
 import {
   buildAreaColorMap,
   CANCELLED_COLOR,
@@ -68,6 +72,9 @@ import {
 } from '@ng-icons/lucide';
 
 import { ZardButtonComponent } from '@/shared/components/button';
+import { ZardFieldImports } from '@/shared/components/field';
+import { ZardInputComponent } from '@/shared/components/input';
+import { ZardSelectImports } from '@/shared/components/select';
 
 import { adapterFactory } from 'angular-calendar/date-adapters/date-fns';
 
@@ -76,13 +83,17 @@ interface LegendEntry {
   color: string;
 }
 
-interface ReservationFormState {
-  residentId: number | null;
-  commonAreaId: number | null;
-  reservationDate: string;
-  timeSlot: number;
-  numberOfGuests: number;
+function buildReservationFormGroup(fb: FormBuilder) {
+  return fb.nonNullable.group({
+    residentId: ['', Validators.required],
+    commonAreaId: ['', Validators.required],
+    reservationDate: ['', Validators.required],
+    timeSlot: [9, [Validators.required, Validators.min(0), Validators.max(23)]],
+    numberOfGuests: [1, [Validators.required, Validators.min(1)]],
+  });
 }
+
+type ReservationFormGroup = ReturnType<typeof buildReservationFormGroup>;
 
 @Component({
   selector: 'app-calendar',
@@ -94,11 +105,14 @@ interface ReservationFormState {
     CommonModule,
     NgIcon,
     ZardButtonComponent,
+    ZardFieldImports,
+    ZardInputComponent,
+    ZardSelectImports,
     CalendarPreviousViewDirective,
     CalendarTodayDirective,
     CalendarNextViewDirective,
     CalendarMonthViewComponent,
-    FormsModule,
+    ReactiveFormsModule,
     CalendarDatePipe,
     DatePipe,
     ReservationListComponent,
@@ -124,8 +138,14 @@ export class Calendar implements OnInit {
     private usersService: UsersService,
     private buildingsService: BuildingsService,
     private userUnitsService: UserUnitsService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private fb: FormBuilder
   ) {}
+
+  ngOnInit(): void {
+    this.reservationForm = buildReservationFormGroup(this.fb);
+    this.loadCalendarData();
+  }
 
   @ViewChild('modalContent', { static: true }) modalContent!: TemplateRef<any>;
 
@@ -140,13 +160,7 @@ export class Calendar implements OnInit {
   todayDate = new Date().toISOString().split('T')[0];
   reservationError = '';
 
-  reservationForm: ReservationFormState = {
-    residentId: null,
-    commonAreaId: null,
-    reservationDate: '',
-    timeSlot: 9,
-    numberOfGuests: 1
-  };
+  reservationForm!: ReservationFormGroup;
 
   view: CalendarView = CalendarView.Month;
   CalendarView = CalendarView;
@@ -184,10 +198,6 @@ export class Calendar implements OnInit {
       },
     },
   ];
-
-  ngOnInit(): void {
-    this.loadCalendarData();
-  }
 
   loadCalendarData(): void {
     forkJoin({
@@ -441,13 +451,13 @@ export class Calendar implements OnInit {
     this.showCreateReservationModal = false;
     this.reservationError = '';
 
-    this.reservationForm = {
-      residentId: null,
-      commonAreaId: null,
+    this.reservationForm.reset({
+      residentId: '',
+      commonAreaId: '',
       reservationDate: '',
       timeSlot: 9,
       numberOfGuests: 1
-    };
+    });
 
     this.cdr.markForCheck();
   }
@@ -455,16 +465,20 @@ export class Calendar implements OnInit {
   createReservation(): void {
     this.reservationError = '';
 
+    if (this.reservationForm.invalid) {
+      this.reservationForm.markAllAsTouched();
+      return;
+    }
+
+    const { residentId, commonAreaId, reservationDate, timeSlot, numberOfGuests } =
+      this.reservationForm.getRawValue();
+
     const selectedArea = this.commonAreas.find(
-      area => String(area.id) === String(this.reservationForm.commonAreaId)
+      area => String(area.id) === String(commonAreaId)
     );
 
-    const reservationDate = this.reservationForm.reservationDate;
-    const timeSlot = Number(this.reservationForm.timeSlot);
-    const numberOfGuests = Number(this.reservationForm.numberOfGuests);
-
-    if (!reservationDate) {
-      this.reservationError = 'Please select a reservation date.';
+    if (!Number.isInteger(timeSlot) || !Number.isInteger(numberOfGuests)) {
+      this.reservationError = 'Time slot and number of guests must be whole numbers.';
       return;
     }
 
@@ -473,26 +487,8 @@ export class Calendar implements OnInit {
       return;
     }
 
-    if (this.reservationForm.residentId == null) {
-      this.reservationError = 'Please select a resident.';
-      return;
-    }
-
-    if (!Number.isInteger(timeSlot) || timeSlot < 0 || timeSlot > 23) {
-      this.reservationError = 'Time slot must be between 0 and 23.';
-      return;
-    }
-    if (this.reservationForm.commonAreaId == null) {
-      this.reservationError = 'Please select a common area.';
-      return;
-    }
     if (!selectedArea) {
       this.reservationError = 'Please select a common area.';
-      return;
-    }
-
-    if (!Number.isInteger(numberOfGuests) || numberOfGuests < 1) {
-      this.reservationError = 'Number of guests must be at least 1.';
       return;
     }
 
@@ -510,7 +506,7 @@ export class Calendar implements OnInit {
       if (reservation.status === 'CANCELLED') return false;
 
       const sameArea =
-        String(reservation.commonAreaId) === String(this.reservationForm.commonAreaId);
+        String(reservation.commonAreaId) === String(commonAreaId);
 
       const sameDate =
         reservation.reservationDate === reservationDate;
@@ -536,8 +532,8 @@ export class Calendar implements OnInit {
     }
 
     const newReservation: CreateReservationResource = {
-      residentId: Number(this.reservationForm.residentId),
-      commonAreaId: Number(this.reservationForm.commonAreaId),
+      residentId: Number(residentId),
+      commonAreaId: Number(commonAreaId),
       reservationDate,
       timeSlot
     };
@@ -558,8 +554,10 @@ export class Calendar implements OnInit {
   }
 
   get selectedAreaCapacity(): number {
+    const commonAreaId = this.reservationForm?.controls.commonAreaId.value;
+
     const area = this.commonAreas.find(
-      area => String(area.id) === String(this.reservationForm.commonAreaId)
+      area => String(area.id) === String(commonAreaId)
     );
 
     return area?.maxCapacity ?? 1;

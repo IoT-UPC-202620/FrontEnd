@@ -66,88 +66,131 @@
       </button>
     </div>
 
-    <form [formGroup]="areaForm" (ngSubmit)="createArea()">
-      <label class="block text-sm font-medium text-muted-foreground mb-1.5">Area Name</label>
-      <input class="h-10 w-full rounded-md border border-input bg-background px-3 text-sm mb-4 outline-none focus-visible:ring-2 focus-visible:ring-ring" formControlName="name" type="text" placeholder="Example: BBQ Area" />
+    <form novalidate [formGroup]="areaForm" (ngSubmit)="createArea()">
+      @let name = areaForm.controls.name;
+      @let nameInvalid = name.invalid && name.touched;
+      <div z-field [attr.data-invalid]="nameInvalid || null" class="mb-4">
+        <label z-field-label for="create-name">Area Name</label>
+        <input z-input id="create-name" formControlName="name" type="text" placeholder="Example: BBQ Area" autocomplete="off" [attr.aria-invalid]="nameInvalid || null" />
+        @if (nameInvalid) {
+          <z-field-error>Area name is required.</z-field-error>
+        }
+      </div>
 
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
-        <div>
-          <label class="block text-sm font-medium text-muted-foreground mb-1.5">Type</label>
-          <select class="h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring" formControlName="type">
-            <option value="POOL">Pool</option>
-            <option value="GYM">Gym</option>
-            <option value="COWORKING_ROOM">Coworking Room</option>
-            <option value="BBQ_AREA">BBQ Area</option>
-            <option value="PARTY_ROOM">Party Room</option>
-            <option value="MEETING_ROOM">Meeting Room</option>
-            <option value="TERRACE">Terrace</option>
-          </select>
+        @let type = areaForm.controls.type;
+        @let typeInvalid = type.invalid && type.touched;
+        <div z-field [attr.data-invalid]="typeInvalid || null">
+          <label z-field-label for="create-type">Type</label>
+          <z-select id="create-type" formControlName="type" zPlaceholder="Select" [zInvalid]="typeInvalid">
+            <z-select-item zValue="POOL">Pool</z-select-item>
+            <z-select-item zValue="GYM">Gym</z-select-item>
+            <z-select-item zValue="COWORKING_ROOM">Coworking Room</z-select-item>
+            <z-select-item zValue="BBQ_AREA">BBQ Area</z-select-item>
+            <z-select-item zValue="PARTY_ROOM">Party Room</z-select-item>
+            <z-select-item zValue="MEETING_ROOM">Meeting Room</z-select-item>
+            <z-select-item zValue="TERRACE">Terrace</z-select-item>
+          </z-select>
         </div>
 
-        <div>
-          <label class="block text-sm font-medium text-muted-foreground mb-1.5">Capacity</label>
-          <input class="h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring" formControlName="maxCapacity" type="number" min="1" />
+        @let maxCapacity = areaForm.controls.maxCapacity;
+        @let maxCapacityInvalid = maxCapacity.invalid && maxCapacity.touched;
+        <div z-field [attr.data-invalid]="maxCapacityInvalid || null">
+          <label z-field-label for="create-max-capacity">Capacity</label>
+          <input z-input id="create-max-capacity" formControlName="maxCapacity" type="number" min="1" [attr.aria-invalid]="maxCapacityInvalid || null" />
+          @if (maxCapacityInvalid) {
+            <z-field-error>Capacity must be at least 1.</z-field-error>
+          }
         </div>
       </div>
 
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
-        <div>
-          <label class="block text-sm font-medium text-muted-foreground mb-1.5">Booking Type</label>
-          <select class="h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring" formControlName="bookingType">
-            <option value="SHARED">Shared</option>
-            <option value="EXCLUSIVE">Exclusive</option>
-          </select>
+        @let bookingType = areaForm.controls.bookingType;
+        @let bookingTypeInvalid = bookingType.invalid && bookingType.touched;
+        <div z-field [attr.data-invalid]="bookingTypeInvalid || null">
+          <label z-field-label for="create-booking-type">Booking Type</label>
+          <z-select id="create-booking-type" formControlName="bookingType" zPlaceholder="Select" [zInvalid]="bookingTypeInvalid">
+            <z-select-item zValue="SHARED">Shared</z-select-item>
+            <z-select-item zValue="EXCLUSIVE">Exclusive</z-select-item>
+          </z-select>
         </div>
 
-        <div>
-          <label class="block text-sm font-medium text-muted-foreground mb-1.5">Status</label>
-          <select class="h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring" formControlName="status">
-            <option value="AVAILABLE">Available</option>
-            <option value="MAINTENANCE">Maintenance</option>
-          </select>
+        @let status = areaForm.controls.status;
+        @let statusInvalid = status.invalid && status.touched;
+        <div z-field [attr.data-invalid]="statusInvalid || null">
+          <label z-field-label for="create-status">Status</label>
+          <z-select id="create-status" formControlName="status" zPlaceholder="Select" [zInvalid]="statusInvalid">
+            <z-select-item zValue="AVAILABLE">Available</z-select-item>
+            <z-select-item zValue="MAINTENANCE">Maintenance</z-select-item>
+          </z-select>
         </div>
       </div>
 
       <h3 class="text-sm font-semibold text-primary mt-2 mb-3">Rules</h3>
 
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
-        <div>
-          <label class="block text-sm font-medium text-muted-foreground mb-1.5">Max Hours</label>
-          <input class="h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring" formControlName="maxReservationHours" type="number" min="1" />
+        @let maxReservationHours = areaForm.controls.maxReservationHours;
+        @let maxReservationHoursInvalid = maxReservationHours.invalid && maxReservationHours.touched;
+        <div z-field [attr.data-invalid]="maxReservationHoursInvalid || null">
+          <label z-field-label for="create-max-hours">Max Hours</label>
+          <input z-input id="create-max-hours" formControlName="maxReservationHours" type="number" min="1" [attr.aria-invalid]="maxReservationHoursInvalid || null" />
+          @if (maxReservationHoursInvalid) {
+            <z-field-error>Max hours must be at least 1.</z-field-error>
+          }
         </div>
 
-        <div>
-          <label class="block text-sm font-medium text-muted-foreground mb-1.5">Price</label>
-          <input class="h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring" formControlName="price" type="number" min="0" />
+        @let price = areaForm.controls.price;
+        @let priceInvalid = price.invalid && price.touched;
+        <div z-field [attr.data-invalid]="priceInvalid || null">
+          <label z-field-label for="create-price">Price</label>
+          <input z-input id="create-price" formControlName="price" type="number" min="0" [attr.aria-invalid]="priceInvalid || null" />
+          @if (priceInvalid) {
+            <z-field-error>Price cannot be negative.</z-field-error>
+          }
         </div>
       </div>
 
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
-        <div>
-          <label class="block text-sm font-medium text-muted-foreground mb-1.5">Guarantee Amount</label>
-          <input class="h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring" formControlName="guaranteeAmount" type="number" min="0" />
+        @let guaranteeAmount = areaForm.controls.guaranteeAmount;
+        @let guaranteeAmountInvalid = guaranteeAmount.invalid && guaranteeAmount.touched;
+        <div z-field [attr.data-invalid]="guaranteeAmountInvalid || null">
+          <label z-field-label for="create-guarantee">Guarantee Amount</label>
+          <input z-input id="create-guarantee" formControlName="guaranteeAmount" type="number" min="0" [attr.aria-invalid]="guaranteeAmountInvalid || null" />
+          @if (guaranteeAmountInvalid) {
+            <z-field-error>Guarantee cannot be negative.</z-field-error>
+          }
         </div>
 
-        <div>
-          <label class="block text-sm font-medium text-muted-foreground mb-1.5">Penalty Amount</label>
-          <input class="h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring" formControlName="penaltyAmount" type="number" min="0" />
+        @let penaltyAmount = areaForm.controls.penaltyAmount;
+        @let penaltyAmountInvalid = penaltyAmount.invalid && penaltyAmount.touched;
+        <div z-field [attr.data-invalid]="penaltyAmountInvalid || null">
+          <label z-field-label for="create-penalty-amount">Penalty Amount</label>
+          <input z-input id="create-penalty-amount" formControlName="penaltyAmount" type="number" min="0" [attr.aria-invalid]="penaltyAmountInvalid || null" />
+          @if (penaltyAmountInvalid) {
+            <z-field-error>Penalty cannot be negative.</z-field-error>
+          }
         </div>
       </div>
 
-      <label class="block text-sm font-medium text-muted-foreground mb-1.5">Penalty Hours Before</label>
-      <input class="h-10 w-full rounded-md border border-input bg-background px-3 text-sm mb-4 outline-none focus-visible:ring-2 focus-visible:ring-ring" formControlName="penaltyHoursBefore" type="number" min="0" />
+      @let penaltyHoursBefore = areaForm.controls.penaltyHoursBefore;
+      @let penaltyHoursBeforeInvalid = penaltyHoursBefore.invalid && penaltyHoursBefore.touched;
+      <div z-field [attr.data-invalid]="penaltyHoursBeforeInvalid || null" class="mb-4">
+        <label z-field-label for="create-penalty-hours">Penalty Hours Before</label>
+        <input z-input id="create-penalty-hours" formControlName="penaltyHoursBefore" type="number" min="0" [attr.aria-invalid]="penaltyHoursBeforeInvalid || null" />
+        @if (penaltyHoursBeforeInvalid) {
+          <z-field-error>Penalty hours cannot be negative.</z-field-error>
+        }
+      </div>
 
       <div class="grid gap-2 mt-2">
-
-
-        <label class="rounded-md bg-muted/50 px-3 py-2 flex justify-between items-center text-sm font-medium text-foreground">
+        <label class="rounded-md bg-muted/50 px-3 py-2 flex justify-between items-center text-sm font-medium text-foreground" for="create-allow-cancellation">
           Allow Cancellation
-          <input class="size-[18px] accent-primary" type="checkbox" formControlName="allowCancellation" />
+          <input id="create-allow-cancellation" class="size-[18px] accent-primary" type="checkbox" formControlName="allowCancellation" />
         </label>
 
-        <label class="rounded-md bg-muted/50 px-3 py-2 flex justify-between items-center text-sm font-medium text-foreground">
+        <label class="rounded-md bg-muted/50 px-3 py-2 flex justify-between items-center text-sm font-medium text-foreground" for="create-requires-approval">
           Requires Approval
-          <input class="size-[18px] accent-primary" type="checkbox" formControlName="requiresApproval" />
+          <input id="create-requires-approval" class="size-[18px] accent-primary" type="checkbox" formControlName="requiresApproval" />
         </label>
       </div>
 
@@ -172,86 +215,131 @@
       </button>
     </div>
 
-    <form [formGroup]="editForm" (ngSubmit)="updateRules()">
-      <label class="block text-sm font-medium text-muted-foreground mb-1.5">Area Name</label>
-      <input class="h-10 w-full rounded-md border border-input bg-background px-3 text-sm mb-4 outline-none focus-visible:ring-2 focus-visible:ring-ring" formControlName="name" type="text" />
+    <form novalidate [formGroup]="editForm" (ngSubmit)="updateRules()">
+      @let editName = editForm.controls.name;
+      @let editNameInvalid = editName.invalid && editName.touched;
+      <div z-field [attr.data-invalid]="editNameInvalid || null" class="mb-4">
+        <label z-field-label for="edit-name">Area Name</label>
+        <input z-input id="edit-name" formControlName="name" type="text" autocomplete="off" [attr.aria-invalid]="editNameInvalid || null" />
+        @if (editNameInvalid) {
+          <z-field-error>Area name is required.</z-field-error>
+        }
+      </div>
 
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
-        <div>
-          <label class="block text-sm font-medium text-muted-foreground mb-1.5">Type</label>
-          <select class="h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring" formControlName="type">
-            <option value="POOL">Pool</option>
-            <option value="GYM">Gym</option>
-            <option value="COWORKING_ROOM">Coworking Room</option>
-            <option value="BBQ_AREA">BBQ Area</option>
-            <option value="PARTY_ROOM">Party Room</option>
-            <option value="MEETING_ROOM">Meeting Room</option>
-            <option value="TERRACE">Terrace</option>
-          </select>
+        @let editType = editForm.controls.type;
+        @let editTypeInvalid = editType.invalid && editType.touched;
+        <div z-field [attr.data-invalid]="editTypeInvalid || null">
+          <label z-field-label for="edit-type">Type</label>
+          <z-select id="edit-type" formControlName="type" zPlaceholder="Select" [zInvalid]="editTypeInvalid">
+            <z-select-item zValue="POOL">Pool</z-select-item>
+            <z-select-item zValue="GYM">Gym</z-select-item>
+            <z-select-item zValue="COWORKING_ROOM">Coworking Room</z-select-item>
+            <z-select-item zValue="BBQ_AREA">BBQ Area</z-select-item>
+            <z-select-item zValue="PARTY_ROOM">Party Room</z-select-item>
+            <z-select-item zValue="MEETING_ROOM">Meeting Room</z-select-item>
+            <z-select-item zValue="TERRACE">Terrace</z-select-item>
+          </z-select>
         </div>
 
-        <div>
-          <label class="block text-sm font-medium text-muted-foreground mb-1.5">Capacity</label>
-          <input class="h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring" formControlName="maxCapacity" type="number" />
+        @let editMaxCapacity = editForm.controls.maxCapacity;
+        @let editMaxCapacityInvalid = editMaxCapacity.invalid && editMaxCapacity.touched;
+        <div z-field [attr.data-invalid]="editMaxCapacityInvalid || null">
+          <label z-field-label for="edit-max-capacity">Capacity</label>
+          <input z-input id="edit-max-capacity" formControlName="maxCapacity" type="number" min="1" [attr.aria-invalid]="editMaxCapacityInvalid || null" />
+          @if (editMaxCapacityInvalid) {
+            <z-field-error>Capacity must be at least 1.</z-field-error>
+          }
         </div>
       </div>
 
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
-        <div>
-          <label class="block text-sm font-medium text-muted-foreground mb-1.5">Booking Type</label>
-          <select class="h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring" formControlName="bookingType">
-            <option value="SHARED">Shared</option>
-            <option value="EXCLUSIVE">Exclusive</option>
-          </select>
+        @let editBookingType = editForm.controls.bookingType;
+        @let editBookingTypeInvalid = editBookingType.invalid && editBookingType.touched;
+        <div z-field [attr.data-invalid]="editBookingTypeInvalid || null">
+          <label z-field-label for="edit-booking-type">Booking Type</label>
+          <z-select id="edit-booking-type" formControlName="bookingType" zPlaceholder="Select" [zInvalid]="editBookingTypeInvalid">
+            <z-select-item zValue="SHARED">Shared</z-select-item>
+            <z-select-item zValue="EXCLUSIVE">Exclusive</z-select-item>
+          </z-select>
         </div>
 
-        <div>
-          <label class="block text-sm font-medium text-muted-foreground mb-1.5">Status</label>
-          <select class="h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring" formControlName="status">
-            <option value="AVAILABLE">Available</option>
-            <option value="MAINTENANCE">Maintenance</option>
-          </select>
+        @let editStatus = editForm.controls.status;
+        @let editStatusInvalid = editStatus.invalid && editStatus.touched;
+        <div z-field [attr.data-invalid]="editStatusInvalid || null">
+          <label z-field-label for="edit-status">Status</label>
+          <z-select id="edit-status" formControlName="status" zPlaceholder="Select" [zInvalid]="editStatusInvalid">
+            <z-select-item zValue="AVAILABLE">Available</z-select-item>
+            <z-select-item zValue="MAINTENANCE">Maintenance</z-select-item>
+          </z-select>
         </div>
       </div>
 
       <h3 class="text-sm font-semibold text-primary mt-2 mb-3">Rules</h3>
 
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
-        <div>
-          <label class="block text-sm font-medium text-muted-foreground mb-1.5">Max Hours</label>
-          <input class="h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring" formControlName="maxReservationHours" type="number" />
+        @let editMaxReservationHours = editForm.controls.maxReservationHours;
+        @let editMaxReservationHoursInvalid = editMaxReservationHours.invalid && editMaxReservationHours.touched;
+        <div z-field [attr.data-invalid]="editMaxReservationHoursInvalid || null">
+          <label z-field-label for="edit-max-hours">Max Hours</label>
+          <input z-input id="edit-max-hours" formControlName="maxReservationHours" type="number" min="1" [attr.aria-invalid]="editMaxReservationHoursInvalid || null" />
+          @if (editMaxReservationHoursInvalid) {
+            <z-field-error>Max hours must be at least 1.</z-field-error>
+          }
         </div>
 
-        <div>
-          <label class="block text-sm font-medium text-muted-foreground mb-1.5">Price</label>
-          <input class="h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring" formControlName="price" type="number" />
+        @let editPrice = editForm.controls.price;
+        @let editPriceInvalid = editPrice.invalid && editPrice.touched;
+        <div z-field [attr.data-invalid]="editPriceInvalid || null">
+          <label z-field-label for="edit-price">Price</label>
+          <input z-input id="edit-price" formControlName="price" type="number" min="0" [attr.aria-invalid]="editPriceInvalid || null" />
+          @if (editPriceInvalid) {
+            <z-field-error>Price cannot be negative.</z-field-error>
+          }
         </div>
       </div>
 
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
-        <div>
-          <label class="block text-sm font-medium text-muted-foreground mb-1.5">Guarantee Amount</label>
-          <input class="h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring" formControlName="guaranteeAmount" type="number" />
+        @let editGuaranteeAmount = editForm.controls.guaranteeAmount;
+        @let editGuaranteeAmountInvalid = editGuaranteeAmount.invalid && editGuaranteeAmount.touched;
+        <div z-field [attr.data-invalid]="editGuaranteeAmountInvalid || null">
+          <label z-field-label for="edit-guarantee">Guarantee Amount</label>
+          <input z-input id="edit-guarantee" formControlName="guaranteeAmount" type="number" min="0" [attr.aria-invalid]="editGuaranteeAmountInvalid || null" />
+          @if (editGuaranteeAmountInvalid) {
+            <z-field-error>Guarantee cannot be negative.</z-field-error>
+          }
         </div>
 
-        <div>
-          <label class="block text-sm font-medium text-muted-foreground mb-1.5">Penalty Amount</label>
-          <input class="h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring" formControlName="penaltyAmount" type="number" />
+        @let editPenaltyAmount = editForm.controls.penaltyAmount;
+        @let editPenaltyAmountInvalid = editPenaltyAmount.invalid && editPenaltyAmount.touched;
+        <div z-field [attr.data-invalid]="editPenaltyAmountInvalid || null">
+          <label z-field-label for="edit-penalty-amount">Penalty Amount</label>
+          <input z-input id="edit-penalty-amount" formControlName="penaltyAmount" type="number" min="0" [attr.aria-invalid]="editPenaltyAmountInvalid || null" />
+          @if (editPenaltyAmountInvalid) {
+            <z-field-error>Penalty cannot be negative.</z-field-error>
+          }
         </div>
       </div>
 
-      <label class="block text-sm font-medium text-muted-foreground mb-1.5">Penalty Hours Before</label>
-      <input class="h-10 w-full rounded-md border border-input bg-background px-3 text-sm mb-4 outline-none focus-visible:ring-2 focus-visible:ring-ring" formControlName="penaltyHoursBefore" type="number" />
+      @let editPenaltyHoursBefore = editForm.controls.penaltyHoursBefore;
+      @let editPenaltyHoursBeforeInvalid = editPenaltyHoursBefore.invalid && editPenaltyHoursBefore.touched;
+      <div z-field [attr.data-invalid]="editPenaltyHoursBeforeInvalid || null" class="mb-4">
+        <label z-field-label for="edit-penalty-hours">Penalty Hours Before</label>
+        <input z-input id="edit-penalty-hours" formControlName="penaltyHoursBefore" type="number" min="0" [attr.aria-invalid]="editPenaltyHoursBeforeInvalid || null" />
+        @if (editPenaltyHoursBeforeInvalid) {
+          <z-field-error>Penalty hours cannot be negative.</z-field-error>
+        }
+      </div>
 
       <div class="grid gap-2 mt-2">
-        <label class="rounded-md bg-muted/50 px-3 py-2 flex justify-between items-center text-sm font-medium text-foreground">
+        <label class="rounded-md bg-muted/50 px-3 py-2 flex justify-between items-center text-sm font-medium text-foreground" for="edit-allow-cancellation">
           Allow Cancellation
-          <input class="size-[18px] accent-primary" type="checkbox" formControlName="allowCancellation" />
+          <input id="edit-allow-cancellation" class="size-[18px] accent-primary" type="checkbox" formControlName="allowCancellation" />
         </label>
 
-        <label class="rounded-md bg-muted/50 px-3 py-2 flex justify-between items-center text-sm font-medium text-foreground">
+        <label class="rounded-md bg-muted/50 px-3 py-2 flex justify-between items-center text-sm font-medium text-foreground" for="edit-requires-approval">
           Requires Approval
-          <input class="size-[18px] accent-primary" type="checkbox" formControlName="requiresApproval" />
+          <input id="edit-requires-approval" class="size-[18px] accent-primary" type="checkbox" formControlName="requiresApproval" />
         </label>
       </div>
 
