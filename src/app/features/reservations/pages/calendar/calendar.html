@@ -1,32 +1,56 @@
-<div class="calendar-card">
-  <div class="calendar-header">
-    <div>
-      <h2>Reservations Calendar</h2>
-      <p>{{ viewDate | calendarDate:(view + 'ViewTitle'):'en' }}</p>
+<div class="rounded-lg border bg-card text-card-foreground shadow-xs">
+  <div
+    class="flex flex-col gap-4 border-b px-6 py-5 sm:flex-row sm:items-center sm:justify-between"
+  >
+    <div class="flex flex-col gap-1">
+      <h2 class="text-lg font-semibold tracking-tight sm:text-xl">Reservations Calendar</h2>
+      <p class="text-sm text-muted-foreground">
+        {{ viewDate | calendarDate:(view + 'ViewTitle'):'en' }}
+      </p>
     </div>
 
-    <div class="calendar-actions">
+    <div class="flex flex-wrap items-center gap-2">
       <button
+        type="button"
+        z-button
+        zType="outline"
+        zSize="icon"
         mwlCalendarPreviousView
         [view]="view"
-        [(viewDate)]="viewDate">
-        ‹
+        [(viewDate)]="viewDate"
+        aria-label="Previous period">
+        <ng-icon name="lucideChevronLeft" class="size-4" />
       </button>
 
       <button
+        type="button"
+        z-button
+        zType="outline"
+        zSize="sm"
         mwlCalendarToday
         [(viewDate)]="viewDate">
         Today
       </button>
 
       <button
+        type="button"
+        z-button
+        zType="outline"
+        zSize="icon"
         mwlCalendarNextView
         [view]="view"
-        [(viewDate)]="viewDate">
-        ›
+        [(viewDate)]="viewDate"
+        aria-label="Next period">
+        <ng-icon name="lucideChevronRight" class="size-4" />
       </button>
 
-      <button class="add-reservation-btn" (click)="openCreateReservationModal()">
+      <button
+        type="button"
+        z-button
+        zType="default"
+        class="gap-2"
+        (click)="openCreateReservationModal()">
+        <ng-icon name="lucidePlus" class="size-4" />
         Add Reservation
       </button>
     </div>
@@ -62,119 +86,157 @@
     (dayClicked)="dayClicked($event.day)">
   </mwl-calendar-month-view>
 
-  <div class="calendar-legend">
+  <div class="flex flex-wrap items-center gap-x-6 gap-y-2 border-t px-6 py-4">
     @for (entry of legend; track entry.label) {
-      <span>
-        <i [style.background]="entry.color"></i>
+      <span class="flex items-center gap-2 text-sm text-muted-foreground">
+        <i class="inline-block size-2.5 rounded-[3px]" [style.background]="entry.color"></i>
         {{ entry.label }}
       </span>
     }
 
     @if (legend.length === 0) {
-      <span class="calendar-legend-empty">Sin reservas registradas</span>
+      <span class="text-sm text-muted-foreground">Sin reservas registradas</span>
     }
   </div>
 </div>
-<div class="modal-backdrop" *ngIf="showCreateReservationModal">
-  <div class="modal-card">
-    <div class="modal-header">
-      <h2>Create Reservation</h2>
-      <button class="close-button" (click)="closeCreateReservationModal()">×</button>
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50" *ngIf="showCreateReservationModal">
+  <div
+    class="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-lg border bg-card p-6 text-card-foreground shadow-lg"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="createReservationTitle">
+    <div class="mb-5 flex items-center justify-between gap-4">
+      <h2 id="createReservationTitle" class="text-lg font-semibold tracking-tight">
+        Create Reservation
+      </h2>
+      <button
+        type="button"
+        z-button
+        zType="ghost"
+        zSize="icon"
+        class="size-8"
+        aria-label="Close"
+        (click)="closeCreateReservationModal()">
+        <ng-icon name="lucideX" class="size-4" />
+      </button>
     </div>
 
-    <form (ngSubmit)="createReservation()">
-      <label for="residentId">Resident</label>
+    <form (ngSubmit)="createReservation()" class="flex flex-col gap-4">
+      <div class="flex flex-col gap-1.5">
+        <label for="residentId" class="text-sm font-medium text-muted-foreground">Resident</label>
 
-      <select
-        id="residentId"
-        [(ngModel)]="reservationForm.residentId"
-        name="residentId"
-        required>
+        <select
+          id="residentId"
+          [(ngModel)]="reservationForm.residentId"
+          name="residentId"
+          required
+          class="h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50">
 
-        <option [ngValue]="null" disabled>
-          Select resident
-        </option>
+          <option [ngValue]="null" disabled>
+            Select resident
+          </option>
 
-        <option
-          *ngFor="let user of users"
-          [ngValue]="user.id">
+          <option
+            *ngFor="let user of users"
+            [ngValue]="user.id">
 
-          {{ user.fullName }} — {{ user.roles[0] }}
-        </option>
-      </select>
+            {{ user.fullName }} — {{ user.roles[0] }}
+          </option>
+        </select>
 
-      <small
-        class="form-help"
-        *ngIf="users.length === 0">
+        <small
+          class="text-xs text-muted-foreground"
+          *ngIf="users.length === 0">
 
-        No active residents are assigned to a unit.
-      </small>
+          No active residents are assigned to a unit.
+        </small>
+      </div>
 
-      <label for="commonAreaId">Common Area</label>
+      <div class="flex flex-col gap-1.5">
+        <label for="commonAreaId" class="text-sm font-medium text-muted-foreground">Common Area</label>
 
-      <select
-        id="commonAreaId"
-        [(ngModel)]="reservationForm.commonAreaId"
-        name="commonAreaId"
-        required>
+        <select
+          id="commonAreaId"
+          [(ngModel)]="reservationForm.commonAreaId"
+          name="commonAreaId"
+          required
+          class="h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50">
 
-        <option [ngValue]="null" disabled>
-          Select common area
-        </option>
+          <option [ngValue]="null" disabled>
+            Select common area
+          </option>
 
-        <option
-          *ngFor="let area of commonAreas"
-          [ngValue]="area.id">
+          <option
+            *ngFor="let area of commonAreas"
+            [ngValue]="area.id">
 
-          {{ area.name }}
-        </option>
-      </select>
+            {{ area.name }}
+          </option>
+        </select>
+      </div>
 
-      <label>Reservation Date</label>
-      <input
-        type="date"
-        [min]="todayDate"
-        [(ngModel)]="reservationForm.reservationDate"
-        name="reservationDate"
-        required>
+      <div class="flex flex-col gap-1.5">
+        <label for="reservationDate" class="text-sm font-medium text-muted-foreground">Reservation Date</label>
+        <input
+          type="date"
+          id="reservationDate"
+          [min]="todayDate"
+          [(ngModel)]="reservationForm.reservationDate"
+          name="reservationDate"
+          required
+          class="h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50">
+      </div>
 
-      <label>Time Slot</label>
-      <input
-        type="number"
-        min="0"
-        max="23"
-        step="1"
-        [(ngModel)]="reservationForm.timeSlot"
-        name="timeSlot"
-        required>
+      <div class="flex flex-col gap-1.5">
+        <label for="timeSlot" class="text-sm font-medium text-muted-foreground">Time Slot</label>
+        <input
+          type="number"
+          id="timeSlot"
+          min="0"
+          max="23"
+          step="1"
+          [(ngModel)]="reservationForm.timeSlot"
+          name="timeSlot"
+          required
+          class="h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50">
+      </div>
 
-      <label>Number of Guests</label>
-      <input
-        type="number"
-        min="1"
-        [max]="selectedAreaCapacity"
-        step="1"
-        [(ngModel)]="reservationForm.numberOfGuests"
-        name="numberOfGuests"
-        required>
+      <div class="flex flex-col gap-1.5">
+        <label for="numberOfGuests" class="text-sm font-medium text-muted-foreground">Number of Guests</label>
+        <input
+          type="number"
+          id="numberOfGuests"
+          min="1"
+          [max]="selectedAreaCapacity"
+          step="1"
+          [(ngModel)]="reservationForm.numberOfGuests"
+          name="numberOfGuests"
+          required
+          class="h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50">
+      </div>
 
-      <p class="form-error" *ngIf="reservationError">
+      <p class="text-sm font-medium text-destructive" *ngIf="reservationError">
         {{ reservationError }}
       </p>
 
-      <div class="modal-actions">
-        <button type="button" class="cancel-button" (click)="closeCreateReservationModal()">
+      <div class="mt-1 grid grid-cols-2 gap-3">
+        <button
+          type="button"
+          z-button
+          zType="outline"
+          class="h-10 w-full"
+          (click)="closeCreateReservationModal()">
           Cancel
         </button>
 
-        <button type="submit" class="save-button">
+        <button type="submit" z-button zType="default" class="h-10 w-full">
           Create Reservation
         </button>
       </div>
     </form>
   </div>
 </div>
-<div class="modal-backdrop" *ngIf="showDayReservationsModal">
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50" *ngIf="showDayReservationsModal">
   <app-reservation-list
     [reservations]="selectedDayReservations"
     (selectReservation)="openReservationDetail($event)"
@@ -182,7 +244,7 @@
   </app-reservation-list>
 </div>
 
-<div class="modal-backdrop" *ngIf="showReservationDetailModal">
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50" *ngIf="showReservationDetailModal">
   <app-reservation-detail
     [reservationDetail]="selectedReservationDetail"
     (close)="closeReservationDetailModal()"

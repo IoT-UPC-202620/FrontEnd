@@ -1,22 +1,42 @@
-<div class="modal-card">
-  <div class="modal-header">
-    <h2>Reservations of the Day</h2>
-    <button class="close-button" (click)="close.emit()">×</button>
+<div
+  class="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-lg border bg-card p-6 text-card-foreground shadow-lg"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="reservationsDayTitle">
+  <div class="mb-5 flex items-center justify-between gap-4">
+    <h2 id="reservationsDayTitle" class="text-lg font-semibold tracking-tight">
+      Reservations of the Day
+    </h2>
+    <button
+      type="button"
+      z-button
+      zType="ghost"
+      zSize="icon"
+      class="size-8"
+      aria-label="Close"
+      (click)="close.emit()">
+      <ng-icon name="lucideX" class="size-4" />
+    </button>
   </div>
 
-  <div class="reservation-list">
+  <div class="flex flex-col gap-2">
     <button
-      class="reservation-list-item"
+      type="button"
+      class="group flex flex-col gap-0.5 rounded-lg border bg-background p-4 text-left transition-colors outline-none hover:border-border hover:bg-muted focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
       *ngFor="let event of reservations"
       (click)="selectReservation.emit(event)">
 
-      <strong>{{ event.meta.area?.name }}</strong>
-      <span>{{ event.meta.user?.fullName }}</span>
-      <small>
+      <span class="font-medium text-foreground">{{ event.meta.area?.name }}</span>
+      <span class="text-sm text-muted-foreground">{{ event.meta.user?.fullName }}</span>
+      <span class="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
+        <ng-icon name="lucideClock" class="size-3.5" />
         {{ formatHour(event.meta.reservation.timeSlot) }}
         -
         {{ formatHour(event.meta.reservation.timeSlot + 1) }}
-      </small>
+        <z-badge zType="outline" class="ml-auto">
+          {{ event.meta.reservation.status }}
+        </z-badge>
+      </span>
     </button>
   </div>
 </div>

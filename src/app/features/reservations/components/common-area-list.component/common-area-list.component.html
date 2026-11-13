@@ -1,4 +1,4 @@
-<div class="common-area-list">
+<div class="flex max-h-[750px] flex-col gap-3 overflow-y-auto pr-2">
   @for (area of commonAreas; track area.id) {
     <app-common-area-card
       [commonArea]="area"

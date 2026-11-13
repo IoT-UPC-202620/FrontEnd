@@ -1,106 +1,28 @@
-.calendar-card {
-  width: 100%;
-  background: white;
-  border-radius: 12px;
-  overflow: hidden;
-  border: 1px solid #f1f1f1;
-}
-h3 {
-  margin: 0 0 10px;
-}
-
-pre {
-  background-color: #f5f5f5;
-  padding: 15px;
-}
-.calendar-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 24px 24px 18px;
-}
-
-.calendar-header h2 {
-  margin: 0;
-  font-size: 22px;
-  color: #111827;
-}
-
-.calendar-header p {
-  margin: 4px 0 0;
-  color: #6b7280;
-  font-size: 14px;
-}
-
-.calendar-actions {
-  display: flex;
-  background: #f8f8f8;
-  border-radius: 6px;
-  overflow: hidden;
-}
-
-.calendar-actions button {
-  border: none;
-  background: transparent;
-  padding: 10px 14px;
-  font-weight: 700;
-  color: #374151;
-  cursor: pointer;
-}
-.calendar-actions p{
-  color: #8A0B80;
-}
-.calendar-actions button:nth-child(2) {
-  color: #990099;
-}
-
-.calendar-legend {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 22px;
-  padding: 18px 24px;
-  background: #fafafa;
-  font-size: 11px;
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
-  color: #4b5563;
-}
-
-.calendar-legend span {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.calendar-legend i {
-  width: 11px;
-  height: 11px;
-  border-radius: 2px;
-  display: inline-block;
-}
-
-.calendar-legend-empty {
-  letter-spacing: normal;
-  text-transform: none;
-  color: #9ca3af;
-}
+/*
+ * Only overrides for markup rendered by mwl-calendar-month-view live here
+ * (the month grid is not part of this component's template). Everything
+ * else is expressed with utilities / zard tokens in the templates.
+ */
 
 :host ::ng-deep .cal-month-view {
   width: 100%;
   border: none;
-  background: white;
+  background: var(--card);
+  border-radius: 0;
 }
 
 :host ::ng-deep .cal-month-view .cal-header {
-  background: #fafafa;
-  border-top: 1px solid #f1f1f1;
+  background: var(--muted);
+  border-top: 1px solid var(--border);
 }
 
 :host ::ng-deep .cal-month-view .cal-header .cal-cell {
-  padding: 12px 0;
-  font-size: 12px;
-  color: #4b5563;
+  padding: 0.75rem 0;
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
   font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 :host ::ng-deep .cal-month-view .cal-days {
@@ -108,222 +30,73 @@ pre {
 }
 
 :host ::ng-deep .cal-month-view .cal-cell-row {
-  border-bottom: 1px solid #f3f4f6;
+  border-bottom: 1px solid var(--border);
+}
+
+:host ::ng-deep .cal-month-view .cal-cell-row:last-child {
+  border-bottom: none;
 }
 
 :host ::ng-deep .cal-month-view .cal-day-cell {
   min-height: 150px;
-  border-right: 1px solid #f3f4f6;
+  border-right: 1px solid var(--border);
 }
 
-:host ::ng-deep .cal-month-view .cal-day-number {
-  float: none;
-  margin: 14px 0 0 14px;
-  font-size: 18px;
-  font-weight: 700;
-  opacity: 1;
-  color: #111827;
+:host ::ng-deep .cal-month-view .cal-day-cell:last-child {
+  border-right: none;
 }
 
 :host ::ng-deep .cal-month-view .cal-out-month .cal-day-number {
-  color: #9ca3af;
-  opacity: 0.7;
+  color: var(--muted-foreground);
+  opacity: 0.6;
 }
 
 :host ::ng-deep .cal-month-view .cal-day-cell.cal-today {
-  background: transparent;
+  background: color-mix(in oklch, var(--primary) 6%, transparent);
 }
 
-:host ::ng-deep .cal-month-view .cal-day-cell.cal-today .cal-day-number {
-  color: #990099;
-  font-size: 18px;
-}
+/* Custom cell template (declared in this component, so no ::ng-deep needed,
+   but kept consistent with the mwl-calendar overrides above). */
 
-:host ::ng-deep .cal-month-view .cal-events {
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  margin: 12px 8px 0;
-  gap: 6px;
-}
-
-:host ::ng-deep .custom-day-cell {
+.custom-day-cell {
   min-height: 150px;
-  padding: 10px 6px;
+  padding: 0.625rem 0.5rem;
 }
 
-:host ::ng-deep .day-number {
-  font-size: 18px;
-  font-weight: 700;
-  color: #111827;
-  margin-bottom: 14px;
+.day-number {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--foreground);
+  margin-bottom: 0.5rem;
 }
 
-:host ::ng-deep .custom-events {
+:host ::ng-deep .cal-month-view .cal-today .day-number {
+  color: var(--primary);
+}
+
+.custom-events {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 0.375rem;
 }
 
-:host ::ng-deep .custom-event {
+.custom-event {
   width: 100%;
-  min-height: 34px;
+  min-height: 1.75rem;
   box-sizing: border-box;
-  border-radius: 4px;
+  border-radius: var(--radius-md);
   border-left: 3px solid transparent;
-  padding: 8px 10px;
-  font-size: 11px;
-  font-weight: 700;
-  line-height: 1.2;
+  padding: 0.375rem 0.5rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  line-height: 1.25;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   cursor: pointer;
+  transition: filter 150ms ease;
 }
 
-:host ::ng-deep .custom-event:hover {
+.custom-event:hover {
   filter: brightness(0.96);
-}
-:host ::ng-deep .custom-event-title {
-  color: white !important;
-  font-size: 11px;
-  font-weight: 700;
-  display: block;
-  width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-:host ::ng-deep .cal-month-view .cal-event {
-  width: 92% !important;
-  min-height: 28px !important;
-  height: auto !important;
-  border-radius: 4px !important;
-  padding: 6px 8px !important;
-  margin: 0 !important;
-
-  background: #f3f4f6 !important;
-
-  font-family: 'Inter', sans-serif;
-  font-size: 11px;
-  font-weight: 700;
-  line-height: 1.2;
-
-  display: block !important;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-:host ::ng-deep .cal-month-view .cal-event-title {
-  color: #111827 !important;
-  display: block !important;
-  text-decoration: none !important;
-}
-
-:host ::ng-deep .cal-month-view .cal-event a {
-  color: #111827 !important;
-  text-decoration: none !important;
-}
-.add-reservation-btn {
-  background-color: #97009c !important;
-  color: white !important;
-  border-radius: 6px;
-  margin-left: 8px;
-}
-
-.add-reservation-btn:hover {
-  background-color: #7d0082 !important;
-}
-
-.modal-backdrop {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.45);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 30;
-}
-
-.modal-card {
-  width: 430px;
-  background: white;
-  border-radius: 10px;
-  padding: 24px;
-  font-family: 'Inter', sans-serif;
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
-}
-
-.modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 18px;
-}
-
-.modal-header h2 {
-  margin: 0;
-  font-size: 20px;
-  font-weight: 800;
-}
-
-.close-button {
-  border: none;
-  background: transparent;
-  font-size: 26px;
-  cursor: pointer;
-}
-
-.modal-card label {
-  display: block;
-  font-size: 13px;
-  font-weight: 700;
-  margin-bottom: 6px;
-}
-
-.modal-card input,
-.modal-card select {
-  width: 100%;
-  height: 42px;
-  border: none;
-  border-radius: 4px;
-  background-color: #f5f5f5;
-  padding: 0 12px;
-  margin-bottom: 14px;
-  box-sizing: border-box;
-}
-
-.modal-actions {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  margin-top: 16px;
-}
-
-.cancel-button,
-.save-button {
-  height: 44px;
-  border: none;
-  border-radius: 6px;
-  font-weight: 700;
-  cursor: pointer;
-}
-
-.cancel-button {
-  background-color: #f3f4f6;
-}
-
-.save-button {
-  background-color: #97009c;
-  color: white;
-}
-.form-error {
-  color: #c62020;
-  font-size: 13px;
-  font-weight: 700;
-  margin: 4px 0 12px;
 }

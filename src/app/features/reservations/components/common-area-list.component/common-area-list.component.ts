@@ -8,7 +8,6 @@ import { CommonArea } from '../../model/common-area.model';
   standalone: true,
   imports: [CommonAreaCardComponent],
   templateUrl: './common-area-list.component.html',
-  styleUrl: './common-area-list.component.css',
 })
 export class CommonAreaListComponent implements OnInit {
   commonAreas: CommonArea[] = [];
