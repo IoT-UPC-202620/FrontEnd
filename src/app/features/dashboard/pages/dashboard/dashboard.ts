@@ -45,6 +45,9 @@ import { UserUnit } from
 import { DashboardService } from
     '../../services/dashboard.service';
 
+import { IotTelemetryDashboard } from
+    '../../../smart-iot/pages/iot-telemetry-dashboard/iot-telemetry-dashboard';
+
 interface BuildingDashboardData {
   building: Building;
   units: Unit[];
@@ -56,7 +59,8 @@ interface BuildingDashboardData {
   standalone: true,
   imports: [
     CommonModule,
-    RouterModule
+    RouterModule,
+    IotTelemetryDashboard
   ],
   providers: [
     DatePipe
