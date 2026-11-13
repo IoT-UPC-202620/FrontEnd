@@ -42,23 +42,8 @@
           Unit
         </z-dropdown-menu-item>
       </z-dropdown-menu-content>
-
-      <button
-        type="button"
-        z-button
-        zType="default"
-        class="mt-2 w-full gap-2 px-4 sm:w-auto"
-        (click)="registerResident()">
-
-        <ng-icon name="lucideUserCheck" class="size-4" />
-        Register Resident
-      </button>
     </div>
   </header>
-
-  <div class="success-banner" *ngIf="successMessage" role="status">
-    {{ successMessage }}
-  </div>
 
   <section
     class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4 *:data-[slot=card]:bg-linear-to-t *:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card *:data-[slot=card]:shadow-xs dark:*:data-[slot=card]:bg-card"
@@ -160,95 +145,86 @@
     </z-card>
   </section>
 
-  <section class="overflow-x-auto rounded-lg border bg-card text-card-foreground shadow-xs">
-    <table z-table>
-      <thead z-table-header>
+  <table
+    z-table
+    class="block w-full overflow-x-auto rounded-lg border bg-card text-card-foreground shadow-xs"
+  >
+    <thead z-table-header>
+      <tr z-table-row>
+        <th z-table-head scope="col">Unit & Tower</th>
+        <th z-table-head scope="col">Primary Resident</th>
+        <th z-table-head scope="col">Status</th>
+        <th z-table-head scope="col">Debt</th>
+        <th z-table-head scope="col">Contact</th>
+        <th z-table-head scope="col" class="text-end">Actions</th>
+      </tr>
+    </thead>
+
+    <tbody z-table-body>
+      @for (row of rows; track row.unitId) {
         <tr z-table-row>
-          <th z-table-head scope="col">Unit & Tower</th>
-          <th z-table-head scope="col">Primary Resident</th>
-          <th z-table-head scope="col">Status</th>
-          <th z-table-head scope="col">Debt</th>
-          <th z-table-head scope="col">Contact</th>
-          <th z-table-head scope="col" class="text-end">Actions</th>
-        </tr>
-      </thead>
+          <td z-table-cell>
+            <div class="font-medium">Unit {{ row.unitNumber }}</div>
+            <div class="text-muted-foreground text-xs">{{ row.tower }}</div>
+          </td>
 
-      <tbody z-table-body>
-        @for (row of rows; track row.unitId) {
-          <tr z-table-row>
-            <td z-table-cell>
-              <div class="font-medium">Unit {{ row.unitNumber }}</div>
-              <div class="text-muted-foreground text-xs">{{ row.tower }}</div>
-            </td>
-
-            <td z-table-cell>
-              <div class="flex items-center gap-2">
-                <div
-                  class="bg-muted text-muted-foreground flex size-9 shrink-0 items-center justify-center rounded-full text-xs font-semibold uppercase"
-                >
-                  {{ row.residentName.charAt(0) }}
-                </div>
-
-                <div>
-                  <div class="font-medium">{{ row.residentName }}</div>
-                  <div class="text-muted-foreground text-xs">{{ row.residentRole }}</div>
-                </div>
-              </div>
-
+          <td z-table-cell>
+            <div class="flex items-center gap-2">
               <div
-                class="failed-links"
-                *ngIf="row.failedLinks.length > 0">
-
-                <div
-                  class="failed-link"
-                  *ngFor="let link of row.failedLinks">
-
-                  <span
-                    class="badge failed"
-                    [title]="link.reason ?? 'status: FAILED'">
-                    FAILED
-                  </span>
-
-                  <small class="failed-reason">
-                    {{ link.reason ?? 'El vínculo no pudo completarse.' }}
-                  </small>
-                </div>
+                class="bg-muted text-muted-foreground flex size-9 shrink-0 items-center justify-center rounded-full text-xs font-semibold uppercase"
+              >
+                {{ row.residentName.charAt(0) }}
               </div>
-            </td>
 
-            <td z-table-cell>
-              <z-badge [zType]="unitStatusBadgeType(row.unitStatus)">
-                {{ row.unitStatus }}
-              </z-badge>
-            </td>
+              <div>
+                <div class="font-medium">{{ row.residentName }}</div>
+                <div class="text-muted-foreground text-xs">{{ row.residentRole }}</div>
+              </div>
+            </div>
 
-            <td z-table-cell>
-              <z-badge [zType]="debtBadgeType(row.debtStatus)">
-                {{ row.debtLabel }}
-              </z-badge>
-            </td>
+            <div class="failed-links" *ngIf="row.failedLinks.length > 0">
+              <div class="failed-link" *ngFor="let link of row.failedLinks">
+                <span class="badge failed" [title]="link.reason ?? 'status: FAILED'"> FAILED </span>
 
-            <td z-table-cell>
-              <div>{{ row.email }}</div>
-              <div class="text-muted-foreground text-xs">{{ row.phone }}</div>
-            </td>
+                <small class="failed-reason">
+                  {{ link.reason ?? 'El vínculo no pudo completarse.' }}
+                </small>
+              </div>
+            </div>
+          </td>
 
-            <td z-table-cell class="text-end">
-              <button z-button zType="outline" zSize="sm" type="button" (click)="editRow(row)">
-                Edit
-              </button>
-            </td>
-          </tr>
-        } @empty {
-          <tr z-table-row>
-            <td z-table-cell [attr.colspan]="6" class="text-muted-foreground h-24 text-center">
-              No units found.
-            </td>
-          </tr>
-        }
-      </tbody>
-    </table>
-  </section>
+          <td z-table-cell>
+            <z-badge [zType]="unitStatusBadgeType(row.unitStatus)">
+              {{ row.unitStatus }}
+            </z-badge>
+          </td>
+
+          <td z-table-cell>
+            <z-badge [zType]="debtBadgeType(row.debtStatus)">
+              {{ row.debtLabel }}
+            </z-badge>
+          </td>
+
+          <td z-table-cell>
+            <div>{{ row.email }}</div>
+            <div class="text-muted-foreground text-xs">{{ row.phone }}</div>
+          </td>
+
+          <td z-table-cell class="text-end">
+            <button z-button zType="outline" zSize="sm" type="button" (click)="editRow(row)">
+              Edit
+            </button>
+          </td>
+        </tr>
+      } @empty {
+        <tr z-table-row>
+          <td z-table-cell [attr.colspan]="6" class="text-muted-foreground h-24 text-center">
+            No units found.
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
 </div>
 <app-unit-form
   *ngIf="(isEditingUnit || isCreatingUnit) && selectedUnit"
@@ -258,16 +234,7 @@
 >
 </app-unit-form>
 
-<app-add-user-form
-  *ngIf="isCreatingUser"
-  (close)="onUserFormClose($event)"
->
-</app-add-user-form>
+<app-add-user-form *ngIf="isCreatingUser" (close)="onUserFormClose($event)"> </app-add-user-form>
 
 <app-building-form *ngIf="isCreatingBuilding" (close)="onBuildingFormClose($event)">
 </app-building-form>
-
-<app-resident-form
-  *ngIf="isRegisteringResident"
-  (close)="onResidentFormClose($event)">
-</app-resident-form>

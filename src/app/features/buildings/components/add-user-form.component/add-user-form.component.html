@@ -21,8 +21,8 @@
   (zAfterClose)="onDialogClosed()"
 >
   <z-dialog-header>
-    <z-dialog-title>Add New User</z-dialog-title>
-    <z-dialog-description>Register a new owner in Edifika.</z-dialog-description>
+    <z-dialog-title>Add User</z-dialog-title>
+    <z-dialog-description>Add a new owner in Edifika.</z-dialog-description>
   </z-dialog-header>
 
   <form
@@ -174,7 +174,7 @@
       form="add-user-form"
       [disabled]="userForm.invalid || isSubmitting"
     >
-      {{ isSubmitting ? 'Creating…' : 'Create User' }}
+      {{ isSubmitting ? 'Adding…' : 'Add User' }}
     </button>
   </z-dialog-footer>
 </z-dialog>

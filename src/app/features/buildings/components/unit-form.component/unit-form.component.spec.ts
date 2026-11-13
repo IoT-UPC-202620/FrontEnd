@@ -22,7 +22,7 @@ describe('UnitFormComponent', () => {
   const building = {
     idBuilding: 1,
     name: 'Edificio Los Olivos',
-    district: 'Miraflores'
+    district: 'Miraflores',
   };
 
   const owner = {
@@ -30,12 +30,12 @@ describe('UnitFormComponent', () => {
     fullName: 'Ana Pérez',
     email: 'ana@example.com',
     roles: ['OWNER'],
-    status: 'ACTIVE'
+    status: 'ACTIVE',
   };
 
   const fillValidForm = (idUser: number | null) => {
     component.unitForm.patchValue({
-      idBuilding: 1,
+      idBuilding: '1',
       unitNumber: 101,
       floor: 1,
       coveredArea: 50,
@@ -43,29 +43,29 @@ describe('UnitFormComponent', () => {
       participationPercentage: 10,
       distributionPercentage: 10,
       status: 'AVAILABLE',
-      idUser
+      idUser: idUser == null ? '0' : String(idUser),
     });
   };
 
   beforeEach(async () => {
     unitsService = {
-      createUnit: jasmine.createSpy('createUnit').and.returnValue(
-        of({ idUnit: 10, idBuilding: 1, unitNumber: 101 })
-      ),
+      createUnit: jasmine
+        .createSpy('createUnit')
+        .and.returnValue(of({ idUnit: 10, idBuilding: 1, unitNumber: 101 })),
       update: jasmine.createSpy('update').and.returnValue(of({})),
-      getUnitUrl: jasmine.createSpy('getUnitUrl').and.returnValue('http://x/units/10')
+      getUnitUrl: jasmine.createSpy('getUnitUrl').and.returnValue('http://x/units/10'),
     };
 
     buildingsService = {
-      getAll: jasmine.createSpy('getAll').and.returnValue(of([building]))
+      getAll: jasmine.createSpy('getAll').and.returnValue(of([building])),
     };
 
     usersService = {
-      getAll: jasmine.createSpy('getAll').and.returnValue(of([owner]))
+      getAll: jasmine.createSpy('getAll').and.returnValue(of([owner])),
     };
 
     userUnitsService = {
-      assignUserToUnit: jasmine.createSpy('assignUserToUnit').and.returnValue(of({}))
+      assignUserToUnit: jasmine.createSpy('assignUserToUnit').and.returnValue(of({})),
     };
 
     await TestBed.configureTestingModule({
@@ -74,8 +74,8 @@ describe('UnitFormComponent', () => {
         { provide: UnitsService, useValue: unitsService },
         { provide: BuildingsService, useValue: buildingsService },
         { provide: UserUnitsService, useValue: userUnitsService },
-        { provide: UsersService, useValue: usersService }
-      ]
+        { provide: UsersService, useValue: usersService },
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(UnitFormComponent);
@@ -112,9 +112,9 @@ describe('UnitFormComponent', () => {
         () =>
           new HttpErrorResponse({
             status: 409,
-            error: { message: 'La unidad ya tiene un titular activo' }
-          })
-      )
+            error: { message: 'La unidad ya tiene un titular activo' },
+          }),
+      ),
     );
 
     fillValidForm(owner.id);
@@ -137,14 +137,14 @@ describe('UnitFormComponent', () => {
 
   it('falls back to the generic message only when the backend sends none', () => {
     userUnitsService.assignUserToUnit.and.returnValue(
-      throwError(() => new HttpErrorResponse({ status: 500, error: null }))
+      throwError(() => new HttpErrorResponse({ status: 500, error: null })),
     );
 
     fillValidForm(owner.id);
     component.onSubmit();
 
     expect(component.errorMessage).toBe(
-      'La unidad fue creada, pero no se pudo asignar el propietario.'
+      'La unidad fue creada, pero no se pudo asignar el propietario.',
     );
   });
 });

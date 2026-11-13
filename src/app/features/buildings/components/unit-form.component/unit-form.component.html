@@ -13,8 +13,7 @@
 @let totalArea = unitForm.controls.totalArea;
 @let totalAreaInvalid = totalArea.invalid && totalArea.touched;
 @let areaMismatch =
-  unitForm.hasError('totalAreaLessThanCoveredArea') &&
-  (totalArea.touched || coveredArea.touched);
+  unitForm.hasError('totalAreaLessThanCoveredArea') && (totalArea.touched || coveredArea.touched);
 
 @let participationPercentage = unitForm.controls.participationPercentage;
 @let participationPercentageInvalid =
@@ -35,11 +34,11 @@
   (zAfterClose)="onDialogClosed()"
 >
   <z-dialog-header>
-    <z-dialog-title>{{ isCreateMode ? 'Create Unit' : 'Edit Unit' }}</z-dialog-title>
+    <z-dialog-title>{{ isCreateMode ? 'Add Unit' : 'Edit Unit' }}</z-dialog-title>
     <z-dialog-description>
       {{
         isCreateMode
-          ? 'Create a new unit and optionally assign an owner.'
+          ? 'Add a new unit and optionally assign an owner.'
           : 'Update the information of the selected unit.'
       }}
     </z-dialog-description>
@@ -206,7 +205,10 @@
 
         @if (participationPercentageInvalid) {
           <z-field-error>
-            @if (participationPercentage.hasError('required') || participationPercentage.hasError('min')) {
+            @if (
+              participationPercentage.hasError('required') ||
+              participationPercentage.hasError('min')
+            ) {
               Participation percentage must be valid.
             }
           </z-field-error>
@@ -230,7 +232,9 @@
 
         @if (distributionPercentageInvalid) {
           <z-field-error>
-            @if (distributionPercentage.hasError('required') || distributionPercentage.hasError('min')) {
+            @if (
+              distributionPercentage.hasError('required') || distributionPercentage.hasError('min')
+            ) {
               Distribution percentage must be valid.
             }
           </z-field-error>
@@ -308,13 +312,7 @@
       form="unit-form"
       [disabled]="unitForm.invalid || isSaving || isLoadingData || buildings.length === 0"
     >
-      {{
-        isSaving
-          ? 'Saving...'
-          : isCreateMode
-            ? 'Create Unit'
-            : 'Save Changes'
-      }}
+      {{ isSaving ? 'Saving...' : isCreateMode ? 'Add Unit' : 'Edit Unit' }}
     </button>
   </z-dialog-footer>
 </z-dialog>
