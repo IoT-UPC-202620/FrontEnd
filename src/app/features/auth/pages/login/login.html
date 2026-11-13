@@ -15,12 +15,7 @@
         <p>Manage your property ecosystem with ease.</p>
       </div>
 
-      <form
-        class="login-fields"
-        [formGroup]="loginForm"
-        (ngSubmit)="login()"
-        autocomplete="off">
-
+      <form class="login-fields" [formGroup]="loginForm" (ngSubmit)="login()" autocomplete="off">
         <label>EMAIL ADDRESS</label>
 
         <div class="input-row">
@@ -30,21 +25,21 @@
             type="email"
             formControlName="email"
             placeholder="admin@edifika.com"
-            autocomplete="off">
+            autocomplete="off"
+          />
         </div>
 
         <label>PASSWORD</label>
 
         <div class="input-row password-row">
-  <span class="material-icons-outlined input-icon">
-    lock
-  </span>
+          <span class="material-icons-outlined input-icon"> lock </span>
 
           <input
             [type]="showPassword ? 'text' : 'password'"
             formControlName="password"
             placeholder="admin123"
-            autocomplete="new-password">
+            autocomplete="new-password"
+          />
 
           <button
             type="button"
@@ -52,17 +47,17 @@
             (click)="togglePasswordVisibility()"
             (mousedown)="$event.preventDefault()"
             [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'"
-            [title]="showPassword ? 'Hide password' : 'Show password'">
-
-    <span class="material-icons-outlined">
-      {{ showPassword ? 'visibility_off' : 'visibility' }}
-    </span>
+            [title]="showPassword ? 'Hide password' : 'Show password'"
+          >
+            <span class="material-icons-outlined">
+              {{ showPassword ? 'visibility_off' : 'visibility' }}
+            </span>
           </button>
         </div>
 
         <div class="form-options">
           <label class="remember-option">
-            <input type="checkbox" formControlName="remember">
+            <input type="checkbox" formControlName="remember" />
             <span>Remember this account</span>
           </label>
 
@@ -73,19 +68,11 @@
           {{ errorMessage }}
         </p>
 
-        <button
-          type="submit"
-          class="login-button"
-          [disabled]="loginForm.invalid || isLoading">
-
+        <button type="submit" z-button [disabled]="loginForm.invalid || isLoading">
           {{ isLoading ? 'Signing in...' : 'Login to Dashboard' }}
         </button>
 
-        <button
-          type="button"
-          class="register-button"
-          (click)="goToRegister()">
-
+        <button type="button" z-button zType="outline" (click)="goToRegister()">
           Register New Account
         </button>
       </form>

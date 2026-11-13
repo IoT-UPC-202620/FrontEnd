@@ -1,22 +1,15 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
-import {
-  FormBuilder,
-  ReactiveFormsModule,
-  Validators
-} from '@angular/forms';
-
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { LoginService } from '../../services/login-service';
 import { SignInResource } from '../../models/sign-in-resource.model';
+import { ZardButtonComponent } from '@/shared/components/button/button.component';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [
-    CommonModule,
-    ReactiveFormsModule
-  ],
+  imports: [CommonModule, ReactiveFormsModule, ZardButtonComponent],
   templateUrl: './login.html',
   styleUrl: './login.css',
 })
@@ -30,18 +23,9 @@ export class Login {
   showPassword = false;
 
   loginForm = this.formBuilder.group({
-    email: [
-      '',
-      [
-        Validators.required,
-        Validators.email
-      ]
-    ],
-    password: [
-      '',
-      Validators.required
-    ],
-    remember: [false]
+    email: ['', [Validators.required, Validators.email]],
+    password: ['', Validators.required],
+    remember: [false],
   });
 
   togglePasswordVisibility(): void {
@@ -59,7 +43,7 @@ export class Login {
 
     const resource: SignInResource = {
       email: this.loginForm.value.email?.trim() ?? '',
-      password: this.loginForm.value.password ?? ''
+      password: this.loginForm.value.password ?? '',
     };
 
     this.loginService.signIn(resource).subscribe({
@@ -70,7 +54,7 @@ export class Login {
       error: () => {
         this.isLoading = false;
         this.errorMessage = 'Email o contraseña incorrectos.';
-      }
+      },
     });
   }
 
