@@ -7,7 +7,6 @@ import {
   lucidePlus,
   lucideTrendingDown,
   lucideTrendingUp,
-  lucideUserCheck,
   lucideUserPlus,
 } from '@ng-icons/lucide';
 import { forkJoin, map, of, switchMap } from 'rxjs';
@@ -42,9 +41,6 @@ import { UnitFormComponent } from '../../components/unit-form.component/unit-for
 
 import { BuildingFormComponent } from '../../components/building-form.component/building-form.component';
 
-import { ResidentFormComponent } from
-    '../../components/resident-form.component/resident-form.component';
-
 @Component({
   selector: 'app-units-residents-page',
   standalone: true,
@@ -58,7 +54,6 @@ import { ResidentFormComponent } from
     UnitFormComponent,
     AddUserFormComponent,
     BuildingFormComponent,
-    ResidentFormComponent,
     ZardBadgeComponent,
   ],
   viewProviders: [
@@ -68,7 +63,6 @@ import { ResidentFormComponent } from
       lucidePlus,
       lucideTrendingDown,
       lucideTrendingUp,
-      lucideUserCheck,
       lucideUserPlus,
     }),
   ],
@@ -89,8 +83,6 @@ export class UnitsResidentsPage implements OnInit {
   isEditingUnit = false;
   isCreatingUser = false;
   isCreatingBuilding = false;
-  isRegisteringResident = false;
-  successMessage = '';
 
   totalUnits = 0;
   outstandingDebt = 0;
@@ -221,14 +213,11 @@ export class UnitsResidentsPage implements OnInit {
     }
 
     const relationsForUnit = residents.filter(
-      resident =>
-        Number(resident.idUnit) === Number(unit.idUnit)
+      (resident) => Number(resident.idUnit) === Number(unit.idUnit),
     );
 
     const activeRelation = relationsForUnit.find(
-      resident =>
-        resident.status === 'ACTIVE' &&
-        !resident.endDate,
+      (resident) => resident.status === 'ACTIVE' && !resident.endDate,
     );
 
     /*
@@ -236,13 +225,10 @@ export class UnitsResidentsPage implements OnInit {
      * modal. Se muestra junto a los ACTIVE con su motivo.
      */
     const failedLinks = relationsForUnit
-      .filter(
-        resident =>
-          (resident.status ?? '').toUpperCase() === 'FAILED'
-      )
-      .map(relation => ({
+      .filter((resident) => (resident.status ?? '').toUpperCase() === 'FAILED')
+      .map((relation) => ({
         residentEmail: relation.residentEmail ?? null,
-        reason: relation.failureReason ?? null
+        reason: relation.failureReason ?? null,
       }));
 
     const residentUser = activeRelation
@@ -251,7 +237,7 @@ export class UnitsResidentsPage implements OnInit {
 
     const failedFallback =
       !activeRelation && failedLinks.length > 0
-        ? failedLinks[0].residentEmail ?? 'Registro fallido'
+        ? (failedLinks[0].residentEmail ?? 'Registro fallido')
         : undefined;
 
     return {
@@ -263,19 +249,15 @@ export class UnitsResidentsPage implements OnInit {
       unitStatus: displayedStatus,
 
       residentId: residentUser?.id,
-      residentName:
-        residentUser?.fullName ??
-        failedFallback ??
-        'No Resident',
+      residentName: residentUser?.fullName ?? failedFallback ?? 'No Resident',
       residentRole:
-        residentUser?.roles?.join(', ') ??
-        (failedFallback ? 'No vinculado' : 'Not assigned'),
+        residentUser?.roles?.join(', ') ?? (failedFallback ? 'No vinculado' : 'Not assigned'),
       email: residentUser?.email ?? '—',
       phone: residentUser?.phone ?? '',
 
       debtStatus: 'N/A',
       debtLabel: 'N/A',
-      failedLinks
+      failedLinks,
     };
   }
 
@@ -359,21 +341,6 @@ export class UnitsResidentsPage implements OnInit {
     this.selectedUnit = null;
 
     if (refresh) {
-      this.loadData();
-    }
-  }
-
-  registerResident(): void {
-    this.isRegisteringResident = true;
-    this.successMessage = '';
-  }
-
-  onResidentFormClose(registered: boolean): void {
-    this.isRegisteringResident = false;
-
-    if (registered) {
-      this.successMessage =
-        'Solicitud enviada. El estado del vínculo aparecerá en la tabla; si queda FAILED, verás el motivo.';
       this.loadData();
     }
   }
