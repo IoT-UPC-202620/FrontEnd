@@ -33,5 +33,7 @@ export const environment = {
 
   notificationEndpointPath: '/notifications',
   deviceTokenEndpointPath: '/device-tokens',
-  reportEndpointPath: '/reports'
+  reportEndpointPath: '/reports',
+
+  telemetryEndpointPath: '/telemetry',
 };
