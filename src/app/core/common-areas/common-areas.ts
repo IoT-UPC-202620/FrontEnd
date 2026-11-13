@@ -1,15 +1,38 @@
 import { Component, OnInit, ViewChild } from '@angular/core';import { Calendar } from '../../features/reservations/pages/calendar/calendar';
 import { CommonAreaListComponent } from '../../features/reservations/components/common-area-list.component/common-area-list.component';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { lucidePlus, lucideWrench, lucideX } from '@ng-icons/lucide';
 
 import { ZardButtonComponent } from '@/shared/components/button';
+import { ZardFieldImports } from '@/shared/components/field';
+import { ZardInputComponent } from '@/shared/components/input';
+import { ZardSelectImports } from '@/shared/components/select';
 
 import { CommonArea } from '../../features/reservations/model/common-area.model';
 import { CommonAreaRule } from '../../features/reservations/model/common-area-rule.model';
 import { CommonAreaService } from '../../features/reservations/services/common-area.service';
+
+function buildAreaFormGroup(fb: NonNullableFormBuilder) {
+  return fb.group({
+    name: ['', Validators.required],
+    type: ['POOL' as CommonArea['type'], Validators.required],
+    status: ['AVAILABLE' as CommonArea['status'], Validators.required],
+    maxCapacity: [1, [Validators.required, Validators.min(1)]],
+    bookingType: ['SHARED' as CommonArea['bookingType'], Validators.required],
+
+    maxReservationHours: [1, [Validators.required, Validators.min(1)]],
+    price: [0, [Validators.required, Validators.min(0)]],
+    guaranteeAmount: [0, [Validators.required, Validators.min(0)]],
+    allowCancellation: [true],
+    penaltyHoursBefore: [24, [Validators.required, Validators.min(0)]],
+    penaltyAmount: [0, [Validators.required, Validators.min(0)]],
+    requiresApproval: [false]
+  });
+}
+
+type AreaFormGroup = ReturnType<typeof buildAreaFormGroup>;
 
 @Component({
   selector: 'app-common-areas',
@@ -20,7 +43,10 @@ import { CommonAreaService } from '../../features/reservations/services/common-a
     Calendar,
     CommonAreaListComponent,
     NgIcon,
-    ZardButtonComponent
+    ZardButtonComponent,
+    ZardFieldImports,
+    ZardInputComponent,
+    ZardSelectImports
   ],
   viewProviders: [
     provideIcons({
@@ -40,8 +66,8 @@ export class CommonAreas implements OnInit {
   selectedArea: CommonArea | null = null;
   commonAreas: CommonArea[] = [];
 
-  areaForm!: FormGroup;
-  editForm!: FormGroup;
+  areaForm!: AreaFormGroup;
+  editForm!: AreaFormGroup;
   @ViewChild(CommonAreaListComponent)
   commonAreaList!: CommonAreaListComponent;
 
@@ -85,22 +111,8 @@ export class CommonAreas implements OnInit {
     });
   }
 
-  private buildAreaForm(): FormGroup {
-    return this.fb.group({
-      name: ['', Validators.required],
-      type: ['POOL', Validators.required],
-      status: ['AVAILABLE', Validators.required],
-      maxCapacity: [1, [Validators.required, Validators.min(1)]],
-      bookingType: ['SHARED', Validators.required],
-
-      maxReservationHours: [1, [Validators.required, Validators.min(1)]],
-      price: [0, [Validators.required, Validators.min(0)]],
-      guaranteeAmount: [0, [Validators.required, Validators.min(0)]],
-      allowCancellation: [true],
-      penaltyHoursBefore: [24, [Validators.required, Validators.min(0)]],
-      penaltyAmount: [0, [Validators.required, Validators.min(0)]],
-      requiresApproval: [false]
-    });
+  private buildAreaForm(): AreaFormGroup {
+    return buildAreaFormGroup(this.fb.nonNullable);
   }
 
   openCreateModal(): void {
