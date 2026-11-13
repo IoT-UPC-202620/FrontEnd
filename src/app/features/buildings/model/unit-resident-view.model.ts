@@ -3,6 +3,8 @@ export interface UnitResidentView {
   unitNumber: number;
   tower: string;
   unitStatus: string;
+  floor: number;
+  totalArea: number;
 
   residentId?: number;
   residentName: string;

@@ -1,13 +1,20 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
   lucideBuilding2,
+  lucideCircleCheck,
+  lucideCircleDashed,
   lucideDoorOpen,
+  lucideEllipsisVertical,
+  lucideGripVertical,
+  lucidePencil,
   lucidePlus,
   lucideTrendingDown,
   lucideTrendingUp,
   lucideUserPlus,
+  lucideWrench,
 } from '@ng-icons/lucide';
 import { forkJoin, map, of, switchMap } from 'rxjs';
 
@@ -46,6 +53,7 @@ import { BuildingFormComponent } from '../../components/building-form.component/
   standalone: true,
   imports: [
     CommonModule,
+    DragDropModule,
     NgIcon,
     ZardButtonComponent,
     ...ZardCardImports,
@@ -59,11 +67,17 @@ import { BuildingFormComponent } from '../../components/building-form.component/
   viewProviders: [
     provideIcons({
       lucideBuilding2,
+      lucideCircleCheck,
+      lucideCircleDashed,
       lucideDoorOpen,
+      lucideEllipsisVertical,
+      lucideGripVertical,
+      lucidePencil,
       lucidePlus,
       lucideTrendingDown,
       lucideTrendingUp,
       lucideUserPlus,
+      lucideWrench,
     }),
   ],
   templateUrl: './units-residents-page.html',
@@ -75,6 +89,8 @@ export class UnitsResidentsPage implements OnInit {
   owners: User[] = [];
 
   selectedUnit: Unit | null = null;
+
+  readonly selectedIds = new Set<number>();
 
   buildingsCount = 0;
   isLoadingData = true;
@@ -174,6 +190,13 @@ export class UnitsResidentsPage implements OnInit {
             units.map((unit) => this.toView(unit, building, residents, users)),
           );
 
+          const visibleIds = new Set(this.rows.map((row) => row.unitId));
+          for (const id of [...this.selectedIds]) {
+            if (!visibleIds.has(id)) {
+              this.selectedIds.delete(id);
+            }
+          }
+
           this.outstandingDebt = this.rows.filter((row) => row.debtStatus === 'LATE').length;
 
           this.occupiedUnits = this.rows.filter((row) => row.unitStatus === 'OCCUPIED').length;
@@ -247,6 +270,8 @@ export class UnitsResidentsPage implements OnInit {
       tower: building.name ?? 'Unknown Building',
 
       unitStatus: displayedStatus,
+      floor: unit.floor,
+      totalArea: unit.totalArea,
 
       residentId: residentUser?.id,
       residentName: residentUser?.fullName ?? failedFallback ?? 'No Resident',
@@ -261,20 +286,75 @@ export class UnitsResidentsPage implements OnInit {
     };
   }
 
-  protected unitStatusBadgeType(status: string): 'default' | 'destructive' | 'outline' {
-    if (status === 'OCCUPIED') {
-      return 'default';
-    }
-
-    if (status === 'MAINTENANCE') {
-      return 'destructive';
-    }
-
-    return 'outline';
-  }
-
   protected debtBadgeType(status: string): 'destructive' | 'secondary' {
     return status === 'LATE' ? 'destructive' : 'secondary';
+  }
+
+  protected get selectedCount(): number {
+    return this.selectedIds.size;
+  }
+
+  protected get allSelected(): boolean {
+    return this.rows.length > 0 && this.rows.every((row) => this.selectedIds.has(row.unitId));
+  }
+
+  protected get someSelected(): boolean {
+    return this.rows.some((row) => this.selectedIds.has(row.unitId));
+  }
+
+  protected isRowSelected(row: UnitResidentView): boolean {
+    return this.selectedIds.has(row.unitId);
+  }
+
+  protected toggleAll(checked: boolean): void {
+    if (checked) {
+      for (const row of this.rows) {
+        this.selectedIds.add(row.unitId);
+      }
+      return;
+    }
+
+    this.selectedIds.clear();
+  }
+
+  protected toggleRow(row: UnitResidentView, checked: boolean): void {
+    if (checked) {
+      this.selectedIds.add(row.unitId);
+      return;
+    }
+
+    this.selectedIds.delete(row.unitId);
+  }
+
+  protected clearSelection(): void {
+    this.selectedIds.clear();
+  }
+
+  protected onDrop(event: CdkDragDrop<UnitResidentView[]>): void {
+    moveItemInArray(this.rows, event.previousIndex, event.currentIndex);
+  }
+
+  protected statusPill(status: string): { label: string; icon: string; classes: string } {
+    switch (status) {
+      case 'OCCUPIED':
+        return {
+          label: 'Occupied',
+          icon: 'lucideCircleCheck',
+          classes: 'border-emerald-600/30 text-emerald-700 dark:text-emerald-400',
+        };
+      case 'MAINTENANCE':
+        return {
+          label: 'Maintenance',
+          icon: 'lucideWrench',
+          classes: 'border-destructive/30 text-destructive',
+        };
+      default:
+        return {
+          label: 'Vacant',
+          icon: 'lucideCircleDashed',
+          classes: 'border-border text-muted-foreground',
+        };
+    }
   }
 
   createBuilding(): void {

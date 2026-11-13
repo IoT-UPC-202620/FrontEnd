@@ -196,6 +196,16 @@ td small {
   background: #fff1f1;
 }
 
+.cdk-drag-preview {
+  background: var(--card, #fff);
+  box-shadow: 0 8px 24px rgb(0 0 0 / 0.12);
+  border-radius: 8px;
+}
+
+.cdk-drag-placeholder {
+  opacity: 0.3;
+}
+
 .failed-links {
   display: flex;
   flex-direction: column;
