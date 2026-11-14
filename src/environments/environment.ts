@@ -18,6 +18,10 @@ export const environment = {
   unitEndpointPath: '/residential/units',
   userUnitEndpointPath: '/residential/user-units',
   residentRegisterEndpointPath: '/residential/residents',
+  // Gestion de residentes (solo ADMIN)
+  residentUsersEndpointPath: '/users/residents',
+  userSearchEndpointPath: '/users/search',
+  residentAssignmentsEndpointPath: '/residential/residents/assignments',
 
   reservationEndpointPath: '/reservations',
   commonAreaEndpointPath: '/common-areas',

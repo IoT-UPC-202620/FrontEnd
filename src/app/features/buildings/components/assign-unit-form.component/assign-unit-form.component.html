@@ -1,0 +1,129 @@
+@let buildingCtrl = placementForm.controls.buildingId;
+@let unitCtrl = placementForm.controls.unitId;
+
+<z-dialog
+  [(zVisible)]="visible"
+  zWidth="640px"
+  [zClosable]="!isSubmitting"
+  [zMaskClosable]="!isSubmitting"
+  (zAfterClose)="onDialogClosed()"
+>
+  <z-dialog-header>
+    <z-dialog-title>Assign to Unit</z-dialog-title>
+    <z-dialog-description>Link an existing owner or tenant to a unit.</z-dialog-description>
+  </z-dialog-header>
+
+  <form novalidate autocomplete="off" id="assign-unit-form" [formGroup]="placementForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-4">
+    <div z-field-group>
+      <!-- 1. Persona -->
+      @if (!selected) {
+        <div z-field>
+          <label z-field-label for="assign-search">Search by DNI or name</label>
+          <input
+            z-input
+            id="assign-search"
+            type="search"
+            [formControl]="searchControl"
+            placeholder="Example: 45678912 or Carla"
+            autocomplete="off"
+          />
+          <p class="text-xs text-muted-foreground">Type at least {{ minChars }} characters.</p>
+        </div>
+
+        @if (isSearching) {
+          <p class="text-sm text-muted-foreground">Searching…</p>
+        } @else if (results.length) {
+          <ul class="flex max-h-60 flex-col divide-y divide-border overflow-y-auto rounded-md border border-border">
+            @for (person of results; track person.id) {
+              <li>
+                <button
+                  type="button"
+                  class="flex w-full items-center justify-between gap-3 px-3 py-2 text-left hover:bg-muted"
+                  (click)="select(person)"
+                >
+                  <span class="min-w-0">
+                    <span class="block truncate text-sm font-medium">{{ person.fullName }}</span>
+                    <span class="block truncate text-xs text-muted-foreground">
+                      {{ person.documentType }} {{ person.documentNumber }} · {{ person.email }}
+                    </span>
+                  </span>
+                  <span class="shrink-0 rounded-md border border-border px-2 py-0.5 text-xs">
+                    {{ roleLabels[person.role] }}
+                  </span>
+                </button>
+              </li>
+            }
+          </ul>
+        } @else if (searched) {
+          <p class="text-sm text-muted-foreground">
+            No results.
+            <button type="button" class="font-medium text-primary underline-offset-4 hover:underline" (click)="requestCreate()">
+              ¿No existe? Créalo con Add Resident / Tenant
+            </button>
+          </p>
+        }
+      } @else {
+        <!-- 2. Datos en solo lectura -->
+        <div class="rounded-md border border-border bg-muted/40 p-4">
+          <div class="mb-3 flex items-center justify-between gap-2">
+            <span class="text-sm font-semibold">Selected person</span>
+            <button z-button zType="ghost" zSize="sm" type="button" (click)="changePerson()">Change</button>
+          </div>
+          <dl class="grid grid-cols-[110px_1fr] gap-x-3 gap-y-1.5 text-sm">
+            <dt class="text-muted-foreground">Name</dt>
+            <dd>{{ selected.fullName }}</dd>
+            <dt class="text-muted-foreground">Email</dt>
+            <dd>{{ selected.email }}</dd>
+            <dt class="text-muted-foreground">Phone</dt>
+            <dd>{{ selected.phone }}</dd>
+            <dt class="text-muted-foreground">Document</dt>
+            <dd>{{ selected.documentType }} {{ selected.documentNumber }}</dd>
+            <dt class="text-muted-foreground">Role</dt>
+            <dd>{{ roleLabels[selected.role] }}</dd>
+          </dl>
+        </div>
+
+        <!-- 3. Torre y unidad -->
+          <div z-field [attr.data-invalid]="(buildingCtrl.invalid && buildingCtrl.touched) || null">
+            <label z-field-label for="assign-building">Tower</label>
+            <z-select formControlName="buildingId" id="assign-building" class="w-full" zPlaceholder="Select a tower">
+              @for (building of buildings; track building.idBuilding) {
+                <z-select-item [zValue]="'' + building.idBuilding">{{ building.name }}</z-select-item>
+              }
+            </z-select>
+          </div>
+
+          <div z-field [attr.data-invalid]="(unitCtrl.invalid && unitCtrl.touched) || null">
+            <label z-field-label for="assign-unit">Unit</label>
+            <z-select
+              formControlName="unitId"
+              id="assign-unit"
+              class="w-full"
+              [zPlaceholder]="!buildingCtrl.value ? 'Select a tower first' : isLoadingUnits ? 'Loading…' : 'Select a unit'"
+              [zDisabled]="!buildingCtrl.value || isLoadingUnits"
+            >
+              @for (unit of units; track unit.idUnit) {
+                <z-select-item [zValue]="'' + unit.idUnit">Unit {{ unit.unitNumber }} · floor {{ unit.floor }}</z-select-item>
+              }
+            </z-select>
+          </div>
+      }
+    </div>
+
+    @if (errorMessage) {
+      <p class="text-sm text-destructive" role="alert">{{ errorMessage }}</p>
+    }
+  </form>
+
+  <z-dialog-footer>
+    <button z-button zType="outline" type="button" z-dialog-close [disabled]="isSubmitting">Cancel</button>
+    <button
+      z-button
+      type="submit"
+      form="assign-unit-form"
+      [disabled]="!selected || placementForm.invalid || isSubmitting"
+    >
+      {{ isSubmitting ? 'Assigning…' : 'Assign to Unit' }}
+    </button>
+  </z-dialog-footer>
+</z-dialog>
