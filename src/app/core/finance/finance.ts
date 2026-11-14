@@ -31,11 +31,15 @@ import {
   UserUnit
 } from '../../features/finance/model/finance.models';
 
+import { MoneyPipe } from '@/shared/core/currency/money.pipe';
+import { formatMoney } from '@/shared/core/currency/currency-display.service';
+
 @Component({
   selector: 'app-finance',
   standalone: true,
   imports: [
     CommonModule,
+    MoneyPipe,
     FormsModule
   ],
   templateUrl: './finance.html',
@@ -995,7 +999,7 @@ export class Finance implements OnInit {
 
       content:
         `You have an outstanding balance of ` +
-        `$${balance.amountDue.toFixed(2)} ` +
+        `${formatMoney(balance.amountDue, 'PEN')} ` +
         `for ${balance.unitDetails} in ` +
         `${balance.buildingName}.`
     };

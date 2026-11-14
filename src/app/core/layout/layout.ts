@@ -1,11 +1,12 @@
 import { Component } from '@angular/core';
 import { Router, RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
+import { CurrencyToggleComponent } from '@/shared/core/currency/currency-toggle.component';
 import {LoginService} from '../../features/auth/services/login-service';
 
 @Component({
   selector: 'app-layout',
   standalone: true,
-  imports: [RouterOutlet, RouterLink, RouterLinkActive],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, CurrencyToggleComponent],
   templateUrl: './layout.html',
   styleUrl: './layout.css'
 })

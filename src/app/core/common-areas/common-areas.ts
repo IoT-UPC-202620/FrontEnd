@@ -13,6 +13,7 @@ import { ZardSelectImports } from '@/shared/components/select';
 import { CommonArea } from '../../features/reservations/model/common-area.model';
 import { CommonAreaRule } from '../../features/reservations/model/common-area-rule.model';
 import { CommonAreaService } from '../../features/reservations/services/common-area.service';
+import { MoneyPipe } from '@/shared/core/currency/money.pipe';
 
 function buildAreaFormGroup(fb: NonNullableFormBuilder) {
   return fb.group({
@@ -39,6 +40,7 @@ type AreaFormGroup = ReturnType<typeof buildAreaFormGroup>;
   standalone: true,
   imports: [
     CommonModule,
+    MoneyPipe,
     ReactiveFormsModule,
     Calendar,
     CommonAreaListComponent,

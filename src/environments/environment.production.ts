@@ -44,4 +44,6 @@ export const environment = {
   accessAttemptsEndpointPath: '/access/attempts',
   iotDevicesEndpointPath: '/iot/devices',
 
+  // Moneda: Payment guarda montos en soles (PEN). Tipo de cambio solo para mostrar en USD.
+  exchangeRateUsdToPen: 3.75
 };

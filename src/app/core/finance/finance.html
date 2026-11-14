@@ -82,7 +82,7 @@
       </div>
 
       <div class="kpi-value">
-        {{ totalRevenue | currency:'USD':'symbol':'1.2-2' }}
+        {{ totalRevenue | money }}
       </div>
     </div>
 
@@ -116,7 +116,7 @@
       </div>
 
       <div class="kpi-value">
-        {{ pendingDues | currency:'USD':'symbol':'1.2-2' }}
+        {{ pendingDues | money }}
       </div>
 
       <div class="kpi-trend text-gray">
@@ -168,7 +168,7 @@
       </div>
 
       <div class="kpi-value">
-        {{ arrears | currency:'USD':'symbol':'1.2-2' }}
+        {{ arrears | money }}
       </div>
     </div>
   </div>
@@ -216,7 +216,7 @@
                 ">
 
                 <div class="chart-tooltip">
-                  {{ data.amount | currency:'USD':'symbol':'1.2-2' }}
+                  {{ data.amount | money }}
                 </div>
               </div>
 
@@ -320,7 +320,7 @@
               <td class="font-bold">
                 {{
                   balance.amountDue
-                    | currency:'USD':'symbol':'1.2-2'
+                    | money
                 }}
               </td>
 
@@ -565,7 +565,7 @@
                 <td class="red-text-bold font-bold">
                   {{
                     balance.amountDue
-                      | currency:'USD':'symbol':'1.2-2'
+                      | money
                   }}
                 </td>
 

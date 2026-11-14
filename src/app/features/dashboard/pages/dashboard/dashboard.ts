@@ -54,11 +54,14 @@ interface BuildingDashboardData {
   residents: UserUnit[];
 }
 
+import { MoneyPipe } from '@/shared/core/currency/money.pipe';
+
 @Component({
   selector: 'app-dashboard',
   standalone: true,
   imports: [
     CommonModule,
+    MoneyPipe,
     RouterModule,
     IotTelemetryDashboard
   ],

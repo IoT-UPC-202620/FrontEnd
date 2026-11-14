@@ -47,7 +47,7 @@
         </div>
         <div class="card-divider"></div>
         <div class="card-footer-text text-gray">
-          Total pending amount: {{ pendingDebtsAmount | currency }}
+          Total pending amount: {{ pendingDebtsAmount | money }}
         </div>
       </div>
     </div>
@@ -72,7 +72,7 @@
             @for (data of monthlyRevenue; track data.month) {
               <div class="bar-wrapper">
                 <div class="bar" [style.height.%]="(data.amount / maxRevenue) * 100">
-                  <div class="chart-tooltip">{{ data.amount | currency }}</div>
+                  <div class="chart-tooltip">{{ data.amount | money }}</div>
                 </div>
               </div>
             }
@@ -89,7 +89,7 @@
         <div class="fin-footer">
           <div class="fin-stat">
             <span class="label small-text">TOTAL COLLECTED</span>
-            <span class="val large-val">{{ totalCollected | currency }}</span>
+            <span class="val large-val">{{ totalCollected | money }}</span>
           </div>
           <div class="fin-stat">
             <span class="label small-text">CURRENT DELINQUENCY</span>
