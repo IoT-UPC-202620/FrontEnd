@@ -1,10 +1,12 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { LoginService } from '../../services/login-service';
 import { SignInResource } from '../../models/sign-in-resource.model';
 import { ZardButtonComponent } from '@/shared/components/button/button.component';
+
+const RESIDENT_ACCOUNT_MESSAGE = 'Esta cuenta es de residente. Usa la app móvil Edifika.';
 
 @Component({
   selector: 'app-login',
@@ -17,9 +19,11 @@ export class Login {
   private router = inject(Router);
   private formBuilder = inject(FormBuilder);
   private loginService = inject(LoginService);
+  private route = inject(ActivatedRoute);
 
   isLoading = false;
-  errorMessage = '';
+  // adminGuard redirige con ?reason=resident si habia un token de residente guardado
+  errorMessage = this.route.snapshot.queryParamMap.get('reason') === 'resident' ? RESIDENT_ACCOUNT_MESSAGE : '';
   showPassword = false;
 
   loginForm = this.formBuilder.group({
@@ -49,6 +53,11 @@ export class Login {
     this.loginService.signIn(resource).subscribe({
       next: () => {
         this.isLoading = false;
+        if (!this.loginService.isAdmin()) {
+          this.loginService.logout();
+          this.errorMessage = RESIDENT_ACCOUNT_MESSAGE;
+          return;
+        }
         this.router.navigate(['/app/dashboard']);
       },
       error: () => {

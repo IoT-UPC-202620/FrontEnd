@@ -3,7 +3,7 @@ import { Routes } from '@angular/router';
 import { Login } from './features/auth/pages/login/login';
 import { Register } from './features/auth/pages/register/register';
 import { Layout } from './core/layout/layout';
-import { authGuard } from './shared/guards/auth.guard';
+import { adminGuard, authGuard } from './shared/guards/auth.guard';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -14,7 +14,8 @@ export const routes: Routes = [
   {
     path: 'app',
     component: Layout,
-    canActivate: [authGuard],
+    canActivate: [authGuard, adminGuard],
+    canActivateChild: [adminGuard],
     children: [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
 
