@@ -1,6 +1,8 @@
-import { Injectable } from '@angular/core';
-import { Observable, delay, map, of } from 'rxjs';
+import { Injectable, inject } from '@angular/core';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Observable, catchError, delay, forkJoin, map, of } from 'rxjs';
 
+import { environment } from '../../../../environments/environment';
 import {
   AccessDeniedEvent,
   IrrigationEvent,
@@ -10,24 +12,116 @@ import {
   SmartIotEvent,
   SmartIotSummaryCard
 } from '../model/smart-iot.model';
+import {
+  ACCESS_REASON_LABELS,
+  AccessAttempt,
+  ReadingSeries,
+  TelemetryAlert,
+  TelemetryDevice,
+  TelemetryMagnitude
+} from '../model/telemetry.model';
 
+interface UserSummary { id: number; fullName: string }
+
+/**
+ * Accesos y telemetria vienen del backend (ApiGateway -> IoT-Access / IoT-Telemetry).
+ * Iluminacion y riego siguen con datos de demostracion: el backend solo modela puertas.
+ */
 @Injectable({
   providedIn: 'root'
 })
 export class SmartIotService {
+  private readonly http = inject(HttpClient);
+  private readonly baseUrl = environment.serverBaseUrl.replace(/\/+$/, '');
+
+  // ---- Telemetria (IoT-Telemetry) ----
+
+  getTelemetryDevices(buildingId?: number): Observable<TelemetryDevice[]> {
+    const params = buildingId ? new HttpParams().set('buildingId', buildingId) : undefined;
+    return this.http.get<TelemetryDevice[]>(`${this.baseUrl}${environment.telemetryDevicesEndpointPath}`, { params });
+  }
+
+  getLatest(deviceCode: string): Observable<TelemetryDevice> {
+    return this.http.get<TelemetryDevice>(
+      `${this.baseUrl}${environment.telemetryDevicesEndpointPath}/${encodeURIComponent(deviceCode)}/latest`
+    );
+  }
+
+  /** Serie agregada por hora (el bucket "raw" del backend esta limitado a 24 h). */
+  getReadings(deviceCode: string, magnitude: TelemetryMagnitude, hours = 24, bucket = '1h'): Observable<ReadingSeries> {
+    const params = new HttpParams()
+      .set('deviceCode', deviceCode)
+      .set('magnitude', magnitude)
+      .set('from', new Date(Date.now() - hours * 3600_000).toISOString())
+      .set('bucket', bucket);
+    return this.http.get<ReadingSeries>(`${this.baseUrl}${environment.telemetryReadingsEndpointPath}`, { params });
+  }
+
+  getAlerts(state?: 'RAISED' | 'CLEARED'): Observable<TelemetryAlert[]> {
+    const params = state ? new HttpParams().set('state', state) : undefined;
+    return this.http.get<TelemetryAlert[]>(`${this.baseUrl}${environment.telemetryAlertsEndpointPath}`, { params });
+  }
+
+  /** Firmware por codigo de dispositivo (GET /iot/devices): de ahi sale el origen Seed / Simulado / Real. */
+  getFirmwareByDevice(): Observable<Record<string, string | null>> {
+    return this.http
+      .get<Array<{ deviceCode: string; firmwareVersion: string | null }>>(`${this.baseUrl}${environment.iotDevicesEndpointPath}`)
+      .pipe(map(devices => Object.fromEntries(devices.map(d => [d.deviceCode, d.firmwareVersion]))));
+  }
+
+  // ---- Bitacora de accesos (IoT-Access) ----
+
+  getAccessAttempts(result?: 'GRANTED' | 'DENIED', limit = 100): Observable<AccessAttempt[]> {
+    let params = new HttpParams().set('limit', limit);
+    if (result) {
+      params = params.set('result', result);
+    }
+    return this.http.get<AccessAttempt[]>(`${this.baseUrl}${environment.accessAttemptsEndpointPath}`, { params });
+  }
+
+  getAccessDeniedEvents(): Observable<AccessDeniedEvent[]> {
+    return forkJoin({
+      attempts: this.getAccessAttempts('DENIED'),
+      users: this.http
+        .get<UserSummary[]>(`${this.baseUrl}${environment.userEndpointPath}`)
+        .pipe(catchError(() => of([] as UserSummary[])))
+    }).pipe(
+      map(({ attempts, users }) => {
+        const names = new Map(users.map(user => [user.id, user.fullName]));
+        return this.sortEvents(attempts.map(attempt => this.toDeniedEvent(attempt, names)));
+      })
+    );
+  }
+
+  private toDeniedEvent(attempt: AccessAttempt, names: Map<number, string>): AccessDeniedEvent {
+    const card = attempt.rfidUidMasked ? `Tarjeta ${attempt.rfidUidMasked}` : 'Tarjeta desconocida';
+    const user = attempt.userId != null ? names.get(attempt.userId) ?? `Usuario #${attempt.userId}` : card;
+    return {
+      id: `attempt-${attempt.id}`,
+      type: 'access-control',
+      user,
+      reason: ACCESS_REASON_LABELS[attempt.reason] ?? attempt.reason,
+      device: attempt.deviceCode,
+      occurredAt: attempt.occurredAt
+    };
+  }
+
+  // ---- Resumen SmartIOT ----
+
   getSmartIotData(): Observable<SmartIotData> {
     const lighting = this.sortEvents(this.lightingEvents);
-    const accessDenied = this.sortEvents(this.accessDeniedEvents);
     const irrigation = this.sortEvents(this.irrigationEvents);
 
-    return of({
-      isDemo: true,
-      lighting,
-      accessDenied,
-      irrigation,
-      activityFrom: this.earliest([...lighting, ...accessDenied, ...irrigation]),
-      activityTo: this.latest([...lighting, ...accessDenied, ...irrigation])
-    }).pipe(delay(250));
+    return this.getAccessDeniedEvents().pipe(
+      map(accessDenied => ({
+        isDemo: false,
+        lighting,
+        accessDenied,
+        irrigation,
+        activityFrom: this.earliest(accessDenied),
+        activityTo: this.latest(accessDenied)
+      }))
+    );
   }
 
   getDashboard(): Observable<SmartIotDashboardData> {
@@ -50,6 +144,7 @@ export class SmartIotService {
         metricLabel: 'encendidos registrados',
         count: data.lighting.length,
         route: '/app/smart-iot/lighting',
+        demo: true,
         lastEvent: data.lighting[0] ?? null
       },
       {
@@ -60,6 +155,7 @@ export class SmartIotService {
         metricLabel: 'accesos denegados',
         count: data.accessDenied.length,
         route: '/app/smart-iot/access-control',
+        demo: false,
         lastEvent: data.accessDenied[0] ?? null
       },
       {
@@ -70,21 +166,20 @@ export class SmartIotService {
         metricLabel: 'activaciones registradas',
         count: data.irrigation.length,
         route: '/app/smart-iot/irrigation',
+        demo: true,
         lastEvent: data.irrigation[0] ?? null
       }
     ];
   }
 
+  /** Demo: no hay luminarias en el backend. */
   getLightingEvents(): Observable<LightingEvent[]> {
-    return this.getSmartIotData().pipe(map(data => data.lighting));
+    return of(this.sortEvents(this.lightingEvents)).pipe(delay(250));
   }
 
-  getAccessDeniedEvents(): Observable<AccessDeniedEvent[]> {
-    return this.getSmartIotData().pipe(map(data => data.accessDenied));
-  }
-
+  /** Demo: no hay regadores en el backend. */
   getIrrigationEvents(): Observable<IrrigationEvent[]> {
-    return this.getSmartIotData().pipe(map(data => data.irrigation));
+    return of(this.sortEvents(this.irrigationEvents)).pipe(delay(250));
   }
 
   private sortEvents<T extends SmartIotEvent>(events: T[]): T[] {
@@ -109,65 +204,6 @@ export class SmartIotService {
 
     return new Date(Math.max(...events.map(event => new Date(event.occurredAt).getTime())));
   }
-
-  private readonly accessDeniedEvents: AccessDeniedEvent[] = [
-    {
-      id: 'access-1',
-      type: 'access-control',
-      user: 'Carlos Méndez',
-      reason: 'Permiso vencido',
-      occurredAt: '2026-10-09T08:36:00'
-    },
-    {
-      id: 'access-2',
-      type: 'access-control',
-      user: 'Lucía Torres',
-      reason: 'Credencial no registrada',
-      occurredAt: '2026-10-09T08:10:00'
-    },
-    {
-      id: 'access-3',
-      type: 'access-control',
-      user: 'Diego Herrera',
-      reason: 'Fuera del horario autorizado',
-      occurredAt: '2026-10-09T07:45:00'
-    },
-    {
-      id: 'access-4',
-      type: 'access-control',
-      user: 'Ana Morales',
-      reason: 'Usuario deshabilitado',
-      occurredAt: '2026-10-09T07:22:00'
-    },
-    {
-      id: 'access-5',
-      type: 'access-control',
-      user: 'Sofía Navarro',
-      reason: 'Tarjeta suspendida',
-      occurredAt: '2026-10-08T21:02:00'
-    },
-    {
-      id: 'access-6',
-      type: 'access-control',
-      user: 'Jorge Bianchi',
-      reason: 'Fuera del horario autorizado',
-      occurredAt: '2026-10-08T19:24:00'
-    },
-    {
-      id: 'access-7',
-      type: 'access-control',
-      user: 'Valeria Castro',
-      reason: 'Credencial no registrada',
-      occurredAt: '2026-10-08T13:47:00'
-    },
-    {
-      id: 'access-8',
-      type: 'access-control',
-      user: 'Martín Quiroz',
-      reason: 'Permiso vencido',
-      occurredAt: '2026-10-08T09:12:00'
-    }
-  ];
 
   private readonly lightingEvents: LightingEvent[] = [
     {

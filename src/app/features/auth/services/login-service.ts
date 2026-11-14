@@ -45,9 +45,33 @@ export class LoginService {
     return true;
   }
 
+  /** Roles del usuario, leidos del claim "roles" del JWT (IAM no los devuelve en el sign-in). */
+  getRoles(): string[] {
+    const payload = this.decodePayload(this.getToken());
+    return Array.isArray(payload?.['roles']) ? (payload['roles'] as string[]) : [];
+  }
+
+  /** La web es solo para administradores; propietarios y tenants usan la app movil. */
+  isAdmin(): boolean {
+    return this.getRoles().includes('ADMIN');
+  }
+
   logout(): void {
     localStorage.removeItem('edifika_token');
     localStorage.removeItem('edifika_user');
+  }
+
+  private decodePayload(token: string | null): Record<string, unknown> | null {
+    const part = token?.split('.')[1];
+    if (!part) {
+      return null;
+    }
+    try {
+      const base64 = part.replace(/-/g, '+').replace(/_/g, '/').padEnd(Math.ceil(part.length / 4) * 4, '=');
+      return JSON.parse(atob(base64));
+    } catch {
+      return null;
+    }
   }
 
   private isTokenExpired(token: string): boolean {

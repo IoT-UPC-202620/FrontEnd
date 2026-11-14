@@ -10,6 +10,9 @@
 @let documentType = userForm.controls.documentType;
 @let documentTypeInvalid = documentType.invalid && documentType.touched;
 
+@let role = userForm.controls.role;
+@let roleInvalid = role.invalid && role.touched;
+
 @let documentNumber = userForm.controls.documentNumber;
 @let documentNumberInvalid = documentNumber.invalid && documentNumber.touched;
 
@@ -21,8 +24,8 @@
   (zAfterClose)="onDialogClosed()"
 >
   <z-dialog-header>
-    <z-dialog-title>Add User</z-dialog-title>
-    <z-dialog-description>Add a new owner in Edifika.</z-dialog-description>
+    <z-dialog-title>Add Resident / Tenant</z-dialog-title>
+    <z-dialog-description>Create an owner or tenant account. Credentials are sent by email.</z-dialog-description>
   </z-dialog-header>
 
   <form
@@ -106,6 +109,26 @@
         }
       </div>
 
+      <!-- Role -->
+      <div z-field [attr.data-invalid]="roleInvalid || null">
+        <label z-field-label for="add-user-role"> Role </label>
+
+        <z-select
+          formControlName="role"
+          id="add-user-role"
+          class="w-full"
+          zPlaceholder="Select a role"
+          [zInvalid]="roleInvalid"
+        >
+          <z-select-item zValue="OWNER">Propietario (OWNER)</z-select-item>
+          <z-select-item zValue="TENANT">Inquilino (TENANT)</z-select-item>
+        </z-select>
+
+        @if (roleInvalid) {
+          <z-field-error>Select a role.</z-field-error>
+        }
+      </div>
+
       <!-- Document type -->
       <div z-field [attr.data-invalid]="documentTypeInvalid || null">
         <label z-field-label for="add-user-documentType"> Document Type </label>
@@ -174,7 +197,7 @@
       form="add-user-form"
       [disabled]="userForm.invalid || isSubmitting"
     >
-      {{ isSubmitting ? 'Adding…' : 'Add User' }}
+      {{ isSubmitting ? 'Adding…' : 'Add Resident / Tenant' }}
     </button>
   </z-dialog-footer>
 </z-dialog>

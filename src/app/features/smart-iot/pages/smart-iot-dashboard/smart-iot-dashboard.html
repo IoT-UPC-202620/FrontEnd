@@ -8,9 +8,11 @@
     </p>
   </div>
 
+  <app-telemetry-live-panel />
+
   <div class="demo-banner">
     <span class="material-icons-outlined">info</span>
-    <p>Datos de demostración. Los registros y usuarios son ficticios; no representan actividad real.</p>
+    <p>Telemetría y control de accesos usan datos reales del backend. Iluminaria y riego automático (marcados <strong>Demo</strong>) siguen con datos ficticios.</p>
   </div>
 
   @if (errorMessage) {
@@ -23,7 +25,7 @@
     <div class="section-header">
       <h2>Sistemas inteligentes</h2>
       @if (activityRange) {
-        <span class="activity-range">Actividad de ejemplo · {{ activityRange }}</span>
+        <span class="activity-range">Accesos denegados · {{ activityRange }}</span>
       }
     </div>
 
@@ -34,7 +36,12 @@
             <span class="material-icons-outlined">{{ card.icon }}</span>
           </div>
 
-          <h3>{{ card.title }}</h3>
+          <h3>
+            {{ card.title }}
+            @if (card.demo) {
+              <span class="demo-tag" title="Datos de demostración">Demo</span>
+            }
+          </h3>
           <p class="system-description">{{ card.description }}</p>
 
           <div class="metric">

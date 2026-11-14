@@ -14,6 +14,7 @@ export interface AccessDeniedEvent {
   occurredAt: string;
   user: string;
   reason: string;
+  device?: string;
 }
 
 export interface IrrigationEvent {
@@ -37,6 +38,8 @@ export interface SmartIotSummaryCard {
   metricLabel: string;
   count: number;
   route: string;
+  /** true = datos de demostracion (no vienen del backend) */
+  demo: boolean;
   lastEvent: SmartIotEvent | null;
 }
 

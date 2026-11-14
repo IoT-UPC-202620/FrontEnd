@@ -373,18 +373,18 @@
 
       <div class="flex items-center justify-between gap-4 rounded-md bg-muted/50 px-3.5 py-3 text-sm text-muted-foreground">
         <span>Price</span>
-        <strong class="text-foreground font-semibold text-right">$ {{ selectedArea.rules?.price ?? 0 }}</strong>
+        <strong class="text-foreground font-semibold text-right">{{ (selectedArea.rules?.price ?? 0) | money }}</strong>
       </div>
 
       <div class="flex items-center justify-between gap-4 rounded-md bg-muted/50 px-3.5 py-3 text-sm text-muted-foreground">
         <span>Guarantee amount</span>
-        <strong class="text-foreground font-semibold text-right">$ {{ selectedArea.rules?.guaranteeAmount ?? 0 }}</strong>
+        <strong class="text-foreground font-semibold text-right">{{ (selectedArea.rules?.guaranteeAmount ?? 0) | money }}</strong>
       </div>
 
       <div class="flex items-center justify-between gap-4 rounded-md bg-muted/50 px-3.5 py-3 text-sm text-muted-foreground">
         <span>Penalty</span>
         <strong class="text-foreground font-semibold text-right">
-          $ {{ selectedArea.rules?.penaltyAmount ?? 0 }}
+          {{ (selectedArea.rules?.penaltyAmount ?? 0) | money }}
           ({{ selectedArea.rules?.penaltyHoursBefore ?? 0 }} h antes)
         </strong>
       </div>

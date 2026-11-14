@@ -9,6 +9,7 @@ import {
   lucideDoorOpen,
   lucideEllipsisVertical,
   lucideGripVertical,
+  lucideLink,
   lucidePencil,
   lucidePlus,
   lucideTrendingDown,
@@ -25,6 +26,7 @@ import { ZardDropdownImports } from '@/shared/components/dropdown/dropdown.impor
 import { ZardTableImports } from '@/shared/components/table';
 
 import { AddUserFormComponent } from '../../components/add-user-form.component/add-user-form.component';
+import { AssignUnitFormComponent } from '../../components/assign-unit-form.component/assign-unit-form.component';
 
 import { UsersService } from '../../../users/services/users.service';
 
@@ -61,6 +63,7 @@ import { BuildingFormComponent } from '../../components/building-form.component/
     ...ZardTableImports,
     UnitFormComponent,
     AddUserFormComponent,
+    AssignUnitFormComponent,
     BuildingFormComponent,
     ZardBadgeComponent,
   ],
@@ -72,6 +75,7 @@ import { BuildingFormComponent } from '../../components/building-form.component/
       lucideDoorOpen,
       lucideEllipsisVertical,
       lucideGripVertical,
+      lucideLink,
       lucidePencil,
       lucidePlus,
       lucideTrendingDown,
@@ -99,6 +103,9 @@ export class UnitsResidentsPage implements OnInit {
   isEditingUnit = false;
   isCreatingUser = false;
   isCreatingBuilding = false;
+  isAssigningUnit = false;
+  /** "¿No existe?" en Assign to Unit: al cerrar ese dialogo se abre Add Resident / Tenant. */
+  openCreateAfterAssign = false;
 
   totalUnits = 0;
   outstandingDebt = 0;
@@ -366,6 +373,24 @@ export class UnitsResidentsPage implements OnInit {
 
     if (refresh) {
       this.loadData();
+    }
+  }
+
+  assignToUnit(): void {
+    this.openCreateAfterAssign = false;
+    this.isAssigningUnit = true;
+  }
+
+  onAssignFormClose(refresh: boolean): void {
+    this.isAssigningUnit = false;
+
+    if (refresh) {
+      this.loadData();
+    }
+
+    if (this.openCreateAfterAssign) {
+      this.openCreateAfterAssign = false;
+      this.createUser();
     }
   }
 

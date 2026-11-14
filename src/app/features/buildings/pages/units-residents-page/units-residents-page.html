@@ -9,39 +9,36 @@
       </p>
     </div>
 
-    <div class="relative shrink-0">
+    <!-- Mismo estilo para todos; "Assign to Unit" es la accion principal (color primario) -->
+    <div class="flex shrink-0 flex-wrap gap-2">
+      <button type="button" z-button zType="outline" zSize="lg" class="gap-2 px-4" (click)="createBuilding()">
+        <ng-icon name="lucideBuilding2" class="size-4" />
+        Add Building
+      </button>
+
       <button
         type="button"
         z-button
-        z-dropdown
-        [zDropdownMenu]="createMenu"
+        zType="outline"
         zSize="lg"
-        class="w-full gap-2 px-4 sm:w-auto"
+        class="gap-2 px-4"
+        (click)="createUnit()"
+        [disabled]="isLoadingData || buildingsCount === 0"
+        [attr.title]="buildingsCount === 0 ? 'Create a building first' : null"
       >
-        <ng-icon name="lucidePlus" class="size-4" />
-        Add new
+        <ng-icon name="lucideDoorOpen" class="size-4" />
+        Add Unit
       </button>
 
-      <z-dropdown-menu-content #createMenu="zDropdownMenuContent" zAlign="end" class="w-56">
-        <z-dropdown-menu-item (click)="createUser()">
-          <ng-icon name="lucideUserPlus" />
-          User
-        </z-dropdown-menu-item>
+      <button type="button" z-button zType="outline" zSize="lg" class="gap-2 px-4" (click)="createUser()">
+        <ng-icon name="lucideUserPlus" class="size-4" />
+        Add Resident / Tenant
+      </button>
 
-        <z-dropdown-menu-item (click)="createBuilding()">
-          <ng-icon name="lucideBuilding2" />
-          Building
-        </z-dropdown-menu-item>
-
-        <z-dropdown-menu-item
-          (click)="createUnit()"
-          [disabled]="isLoadingData || buildingsCount === 0"
-          [attr.title]="buildingsCount === 0 ? 'Create a building first' : null"
-        >
-          <ng-icon name="lucideDoorOpen" />
-          Unit
-        </z-dropdown-menu-item>
-      </z-dropdown-menu-content>
+      <button type="button" z-button zSize="lg" class="gap-2 px-4" (click)="assignToUnit()">
+        <ng-icon name="lucideLink" class="size-4" />
+        Assign to Unit
+      </button>
     </div>
   </header>
 
@@ -310,6 +307,13 @@
 </app-unit-form>
 
 <app-add-user-form *ngIf="isCreatingUser" (close)="onUserFormClose($event)"> </app-add-user-form>
+
+<app-assign-unit-form
+  *ngIf="isAssigningUnit"
+  (close)="onAssignFormClose($event)"
+  (createRequested)="openCreateAfterAssign = true"
+>
+</app-assign-unit-form>
 
 <app-building-form *ngIf="isCreatingBuilding" (close)="onBuildingFormClose($event)">
 </app-building-form>

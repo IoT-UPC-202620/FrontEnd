@@ -4,6 +4,7 @@ import {provideHttpClient, withInterceptors} from '@angular/common/http';
 
 import { routes } from './app.routes';
 import {authTokenInterceptor} from './shared/interceptors/auth-token.interceptor';
+import {ngrokSkipWarningInterceptor} from './shared/interceptors/ngrok-skip-warning.interceptor';
 import { provideZard } from '@/shared/core/provider/providezard';
 
 export const appConfig: ApplicationConfig = {
@@ -12,7 +13,7 @@ export const appConfig: ApplicationConfig = {
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),
     provideHttpClient(
-      withInterceptors([authTokenInterceptor])
+      withInterceptors([authTokenInterceptor, ngrokSkipWarningInterceptor])
     ),
     provideZard(),
   ]

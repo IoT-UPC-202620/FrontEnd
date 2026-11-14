@@ -353,3 +353,15 @@
   color: #4f3b4d;
   line-height: 1.5;
 }
+
+/* Placeholder de avatar: iniciales sobre un color derivado del nombre */
+.avatar-initials {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.5px;
+  user-select: none;
+}

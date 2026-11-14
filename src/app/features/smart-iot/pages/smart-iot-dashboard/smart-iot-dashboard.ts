@@ -9,13 +9,14 @@ import {
   SmartIotSummaryCard
 } from '../../model/smart-iot.model';
 import { SmartIotService } from '../../services/smart-iot.service';
+import { TelemetryLivePanel } from './telemetry-live-panel';
 
 const MONTHS = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
 
 @Component({
   selector: 'app-smart-iot-dashboard',
   standalone: true,
-  imports: [RouterLink],
+  imports: [RouterLink, TelemetryLivePanel],
   templateUrl: './smart-iot-dashboard.html',
   styleUrl: './smart-iot-dashboard.css'
 })
@@ -64,7 +65,7 @@ export class SmartIotDashboard implements OnInit {
 
     if (event.type === 'access-control') {
       const access = event as AccessDeniedEvent;
-      return `${access.user} · ${access.reason}`;
+      return [access.user, access.reason, access.device].filter(Boolean).join(' · ');
     }
 
     const irrigation = event as IrrigationEvent;

@@ -25,8 +25,7 @@ import { ZardInputComponent } from '@/shared/components/input';
 import { ZardSelectImports } from '@/shared/components/select';
 import { ZardSonnerService } from '@/shared/components/sonner';
 
-import { RegisterService } from '../../../auth/services/register-service';
-import { SignUpResource } from '../../../auth/models/sign-up-resource.model';
+import { ResidentManagementService, ResidentRole } from '../../services/resident-management.service';
 
 @Component({
   selector: 'app-add-user-form',
@@ -46,7 +45,7 @@ export class AddUserFormComponent {
   @Output() readonly close = new EventEmitter<boolean>();
 
   private readonly fb = inject(FormBuilder);
-  private readonly registerService = inject(RegisterService);
+  private readonly residents = inject(ResidentManagementService);
   private readonly sonner = inject(ZardSonnerService);
 
   protected readonly userForm = this.fb.nonNullable.group({
@@ -79,6 +78,12 @@ export class AddUserFormComponent {
       Validators.required,
     ],
 
+    // Obligatorio: Propietario (OWNER) o Inquilino (TENANT). IAM rechaza cualquier otro.
+    role: [
+      '' as ResidentRole | '',
+      Validators.required,
+    ],
+
     documentNumber: [
       '',
       [
@@ -106,23 +111,20 @@ export class AddUserFormComponent {
 
     const value = this.userForm.getRawValue();
 
-    const resource: SignUpResource = {
+    // POST /users/residents (solo ADMIN): IAM genera la contraseña temporal y la envía por correo.
+    this.residents.createResident({
       fullName: value.fullName.trim(),
       email: value.email.trim(),
       phone: value.phone.trim(),
       documentType: value.documentType,
       documentNumber: value.documentNumber.trim(),
-
-      // Users created here are always OWNERs.
-      roles: ['OWNER'],
-    };
-
-    this.registerService.signUp(resource).subscribe({
+      role: value.role as ResidentRole,
+    }).subscribe({
       next: () => {
         this.isSubmitting = false;
         this.result = true;
-        this.sonner.success('User created', {
-          description: 'The new owner has been registered and will receive their credentials by email.',
+        this.sonner.success('Resident created', {
+          description: `${value.role === 'TENANT' ? 'Tenant' : 'Owner'} registered. Credentials were sent by email. Use "Assign to Unit" to link them to a unit.`,
         });
         this.visible.set(false);
       },
