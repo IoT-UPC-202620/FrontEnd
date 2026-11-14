@@ -12,9 +12,27 @@ interface Post {
   residentId: number;
   imageUrl?: string;
   createdAt: string;
+  /** Rol del autor guardado por Forum al publicar (ADMIN | OWNER | TENANT). */
+  authorRole?: string | null;
 }
 
-interface User { id: number; fullName: string; }
+interface User { id: number; fullName: string; roles?: string[]; }
+
+const ROLE_LABELS: Record<string, string> = { ADMIN: 'Administrador', OWNER: 'Propietario', TENANT: 'Inquilino' };
+const ROLE_PRIORITY = ['ADMIN', 'OWNER', 'TENANT'];
+
+/** "Ana Perez" -> "AP" */
+function initialsOf(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  return ((parts[0]?.[0] ?? '?') + (parts.length > 1 ? parts[parts.length - 1][0] : '')).toUpperCase();
+}
+
+/** Color estable derivado del nombre (mismo nombre, mismo color). */
+function colorOf(name: string): string {
+  let hash = 0;
+  for (const char of name) hash = (hash * 31 + char.charCodeAt(0)) | 0;
+  return `hsl(${Math.abs(hash) % 360} 55% 42%)`;
+}
 
 interface PageResponse<T> {
   content: T[];
@@ -26,7 +44,8 @@ interface EnrichedPost {
   content: string;
   authorName: string;
   authorUnit: string;
-  authorAvatar: string;
+  authorInitials: string;
+  authorColor: string;
   timeAgo: string;
   isAnnouncement: boolean;
   hasAttachedImage: boolean;
@@ -70,13 +89,13 @@ export class CommunityWall implements OnInit {
 
         const isAnnouncement = p.title.toLowerCase().includes('mantenimiento') || p.title.toLowerCase().includes('official');
 
-        let authorName = user ? user.fullName : 'Unknown Resident';
-        let authorAvatar = p.imageUrl || 'https://i.pravatar.cc/150?u=default';
-        let authorUnit = 'Resident';
+        let authorName = user ? user.fullName : 'Usuario desconocido';
+        // Rol guardado en el post; para posts anteriores a la columna, el rol actual del usuario
+        const role = p.authorRole ?? ROLE_PRIORITY.find(r => user?.roles?.includes(r));
+        const authorUnit = role ? ROLE_LABELS[role] ?? role : 'Residente';
 
         if (isAnnouncement) {
           authorName = 'Edifika Management';
-          authorAvatar = ''; // use icon in template
         }
 
         return {
@@ -85,7 +104,8 @@ export class CommunityWall implements OnInit {
           content: p.content,
           authorName: authorName,
           authorUnit: authorUnit,
-          authorAvatar: authorAvatar,
+          authorInitials: initialsOf(authorName),
+          authorColor: colorOf(authorName),
           timeAgo: this.getTimeAgo(p.createdAt),
           isAnnouncement: isAnnouncement,
           hasAttachedImage: !!p.imageUrl || isAnnouncement,
