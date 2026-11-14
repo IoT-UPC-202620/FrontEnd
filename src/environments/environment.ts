@@ -36,4 +36,12 @@ export const environment = {
   reportEndpointPath: '/reports',
 
   telemetryEndpointPath: '/telemetry',
+
+  // IoT: telemetria (IoT-Telemetry) y bitacora de accesos (IoT-Access)
+  telemetryDevicesEndpointPath: '/telemetry/devices',
+  telemetryReadingsEndpointPath: '/telemetry/readings',
+  telemetryAlertsEndpointPath: '/telemetry/alerts',
+  accessAttemptsEndpointPath: '/access/attempts',
+  iotDevicesEndpointPath: '/iot/devices',
+
 };

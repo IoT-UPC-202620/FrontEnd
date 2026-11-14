@@ -7,7 +7,7 @@
   <div class="page-header">
     <div>
       <h1>Control de accesos</h1>
-      <p>Intentos de acceso denegados por la cerradura inteligente del acceso principal.</p>
+      <p>Intentos de acceso denegados registrados por las cerraduras inteligentes (IoT-Access).</p>
       <a class="cards-link" routerLink="/app/smart-iot/cards">
         Gestionar tarjetas de acceso
         <span class="material-icons-outlined">arrow_forward</span>
@@ -16,9 +16,6 @@
     <div class="total-chip">Total: {{ events.length }}</div>
   </div>
 
-  <div class="demo-banner">
-    Datos de demostración. Los registros y usuarios son ficticios; no representan actividad real.
-  </div>
 
   @if (errorMessage) {
     <div class="error-banner">{{ errorMessage }}</div>
@@ -34,6 +31,7 @@
             <tr>
               <th>Usuario</th>
               <th>Razón</th>
+              <th>Puerta</th>
               <th>Fecha</th>
               <th>Hora</th>
             </tr>
@@ -43,12 +41,13 @@
               <tr>
                 <td>{{ event.user }}</td>
                 <td><span class="danger-text">{{ event.reason }}</span></td>
+                <td>{{ event.device }}</td>
                 <td>{{ formatDate(event.occurredAt) }}</td>
                 <td>{{ formatTime(event.occurredAt) }}</td>
               </tr>
             } @empty {
               <tr>
-                <td colspan="4" class="empty-cell">No hay accesos denegados registrados.</td>
+                <td colspan="5" class="empty-cell">No hay accesos denegados registrados.</td>
               </tr>
             }
           </tbody>
